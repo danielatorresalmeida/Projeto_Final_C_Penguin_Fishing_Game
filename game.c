@@ -192,7 +192,7 @@ static void desenharJogo(const EstadoJogo *jogo) {
         }
     }
 
-    clear();
+    erase();
 
     mvprintw(0, 0, "Penguin Fishing Game");
     mvprintw(1, 0, "Modo: %s", nomeModo(jogo->modo));
@@ -223,8 +223,6 @@ static void desenharJogo(const EstadoJogo *jogo) {
             mvaddch(i + 8, j, tabuleiro[i][j]);
         }
     }
-
-    refresh();
 }
 
 static void moverJogador1(Jogador *jogador, int tecla) {
@@ -364,6 +362,7 @@ static void verificarCapturas(EstadoJogo *jogo) {
 
 void cicloJogo(EstadoJogo *jogo) {
     int tecla;
+    int ultimaTecla;
     int contadorMovimentoPeixe = 0;
     time_t ultimoSegundo = time(NULL);
 
@@ -373,22 +372,35 @@ void cicloJogo(EstadoJogo *jogo) {
     noecho();
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
+    set_escdelay(25);
     curs_set(0);
 
     while (jogo->ativo && jogo->tempo > 0) {
-        desenharJogo(jogo);
+        ultimaTecla = ERR;
 
+        // Lê todas as teclas acumuladas
         tecla = getch();
 
-        if (tecla == 'q' || tecla == 'Q') {
-            jogo->ativo = 0;
-            break;
+        while (tecla != ERR) {
+            ultimaTecla = tecla;
+            tecla = getch();
         }
 
-        moverJogador1(&jogo->p1, tecla);
+        // Processa apenas a tecla mais recente
+        if (ultimaTecla != ERR) {
+            if (ultimaTecla == 'q' || ultimaTecla == 'Q') {
+                jogo->ativo = 0;
+                break;
+            }
 
-        if (jogo->jogadores == 2) {
-            moverJogador2(&jogo->p2, tecla);
+            moverJogador1(&jogo->p1, ultimaTecla);
+
+            if (jogo->jogadores == 2) {
+                moverJogador2(&jogo->p2, ultimaTecla);
+            }
+
+            // Limpa teclas antigas para reduzir atraso
+            flushinp();
         }
 
         // O peixe mexe a cada alguns frames
@@ -407,7 +419,12 @@ void cicloJogo(EstadoJogo *jogo) {
             ultimoSegundo = time(NULL);
         }
 
-        napms(80);
+        // Desenha tudo depois das atualizações
+        desenharJogo(jogo);
+        refresh();
+
+        // Pequena pausa para controlar a velocidade do jogo
+        napms(35);
     }
 
     // Fecha o ncurses

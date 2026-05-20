@@ -43,9 +43,8 @@ typedef struct {
 
 void mostrarMenu(void);
 int lerOpcao(void);
+void mudarIdioma(void);
 void iniciarJogo(EstadoJogo *jogo, int opcao);
 void cicloJogo(EstadoJogo *jogo);
 void mostrarResultado(const EstadoJogo *jogo);
-const char *nomeModo(ModoJogo modo);
-
 #endif

@@ -1,25 +1,112 @@
-#include "game.h"
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
+#include "game.h"
+
+typedef enum { IDIOMA_EN = 1, IDIOMA_PT = 2 } Idioma;
+
+static Idioma idiomaAtual = IDIOMA_EN;
+static int idiomaFoiEscolhido = 0;
+
+static const char *texto(const char *en, const char *pt) {
+  if (idiomaAtual == IDIOMA_PT) {
+    return pt;
+  }
+
+  return en;
+}
+
+static void imprimirLinha(int largura) {
+  for (int i = 0; i < largura; i++) {
+    printf("=");
+  }
+
+  printf("\n");
+}
+
+static void imprimirTitulo(const char *titulo) {
+  int tamanhoTitulo = strlen(titulo);
+  int largura = tamanhoTitulo + 10;
+  int espacos;
+
+  if (largura < 36) {
+    largura = 36;
+  }
+
+  espacos = (largura - tamanhoTitulo) / 2;
+
+  imprimirLinha(largura);
+
+  for (int i = 0; i < espacos; i++) {
+    printf(" ");
+  }
+
+  printf("%s\n", titulo);
+
+  imprimirLinha(largura);
+}
+
+static void escolherIdioma(void) {
+  char linha[20];
+  int opcao = 0;
+
+  while (opcao != 1 && opcao != 2) {
+    printf("\n");
+    imprimirTitulo("LANGUAGE / IDIOMA");
+    printf("1 - English\n");
+    printf("2 - Portugues\n");
+    printf("Option / Opcao: ");
+
+    if (fgets(linha, sizeof(linha), stdin) == NULL) {
+      idiomaAtual = IDIOMA_EN;
+      idiomaFoiEscolhido = 1;
+      return;
+    }
+
+    opcao = atoi(linha);
+
+    if (opcao == 1) {
+      idiomaAtual = IDIOMA_EN;
+    } else if (opcao == 2) {
+      idiomaAtual = IDIOMA_PT;
+    } else {
+      printf("Invalid option / Opcao invalida.\n");
+    }
+  }
+
+  idiomaFoiEscolhido = 1;
+}
+
+void mudarIdioma(void) {
+  idiomaFoiEscolhido = 0;
+  escolherIdioma();
+}
+
 void mostrarMenu(void) {
-  printf("\n==============================\n");
-  printf("     PENGUIN FISHING GAME\n");
-  printf("==============================\n");
-  printf("1 - Solo: mais peixes\n");
-  printf("2 - Solo: mais peso\n");
-  printf("3 - Solo: empilhar peixes\n");
-  printf("4 - 2 jogadores: mais peixes\n");
-  printf("5 - 2 jogadores: mais peso\n");
-  printf("6 - 2 jogadores: empilhar peixes\n");
-  printf("7 - Pratica: mais peixes\n");
-  printf("8 - Pratica: mais peso\n");
-  printf("9 - Pratica: empilhar peixes\n");
-  printf("0 - Sair\n");
-  printf("Escolhe uma opcao: ");
+  if (!idiomaFoiEscolhido) {
+    escolherIdioma();
+  }
+
+  printf("\n");
+  imprimirTitulo(texto("PENGUIN FISHING GAME", "JOGO DE PESCA DOS PINGUINS"));
+
+  printf("1 - %s\n", texto("Solo: most fish", "Solo: mais peixes"));
+  printf("2 - %s\n", texto("Solo: most weight", "Solo: mais peso"));
+  printf("3 - %s\n", texto("Solo: stack fish", "Solo: empilhar peixes"));
+  printf("4 - %s\n", texto("2 players: most fish", "2 jogadores: mais peixes"));
+  printf("5 - %s\n", texto("2 players: most weight", "2 jogadores: mais peso"));
+  printf("6 - %s\n",
+         texto("2 players: stack fish", "2 jogadores: empilhar peixes"));
+  printf("7 - %s\n", texto("Practice: most fish", "Pratica: mais peixes"));
+  printf("8 - %s\n", texto("Practice: most weight", "Pratica: mais peso"));
+  printf("9 - %s\n", texto("Practice: stack fish", "Pratica: empilhar peixes"));
+  printf("10 - %s\n", texto("Change language", "Mudar idioma"));
+  printf("0 - %s\n", texto("Exit", "Sair"));
+
+  printf("%s", texto("Choose an option: ", "Escolhe uma opcao: "));
 }
 
 int lerOpcao(void) {
@@ -27,59 +114,62 @@ int lerOpcao(void) {
   int opcao;
 
   while (1) {
-    // Lê a opção como texto
     if (fgets(linha, sizeof(linha), stdin) == NULL) {
       return 0;
     }
 
-    // Se o utilizador só carregar ENTER, pede outra vez
     if (linha[0] == '\n') {
-      printf("Escolhe uma opcao: ");
+      printf("%s", texto("Choose an option: ", "Escolhe uma opcao: "));
       continue;
     }
 
     opcao = atoi(linha);
 
-    // Só aceita opções entre 0 e 9
-    if (opcao >= 0 && opcao <= 9) {
+    if (opcao >= 0 && opcao <= 10) {
       return opcao;
     }
 
-    printf("Opcao invalida. Escolhe uma opcao entre 0 e 9: ");
+    printf("%s", texto("Invalid option. Choose an option between 0 and 10: ",
+                       "Opcao invalida. Escolhe uma opcao entre 0 e 10: "));
   }
 }
 
 const char *nomeModo(ModoJogo modo) {
   if (modo == MAIS_PEIXES) {
-    return "Mais Peixes";
+    return texto("Most Fish", "Mais Peixes");
   }
 
   if (modo == MAIS_PESO) {
-    return "Mais Peso";
+    return texto("Most Weight", "Mais Peso");
   }
 
   if (modo == EMPILHAR) {
-    return "Empilhar Peixes";
+    return texto("Stack Fish", "Empilhar Peixes");
   }
 
-  return "Menu";
+  return texto("Menu", "Menu");
 }
 
 const char *objetivoModo(ModoJogo modo) {
   if (modo == MAIS_PEIXES) {
-    return "Objetivo: apanhar o maior numero de peixes";
+    return texto("Goal: catch the highest number of fish",
+                 "Objetivo: apanhar o maior numero de peixes");
   }
 
   if (modo == MAIS_PESO) {
-    return "Objetivo: apanhar peixes com maior peso";
+    return texto("Goal: catch fish with the highest total weight",
+                 "Objetivo: apanhar peixes com maior peso total");
   }
 
   if (modo == EMPILHAR) {
-    return "Objetivo: empilhar o maior numero de peixes";
+    return texto("Goal: stack the highest number of fish",
+                 "Objetivo: empilhar o maior numero de peixes");
   }
 
   return "";
 }
+
+static void gerarPeixeSeguro(EstadoJogo *jogo);
 
 static void prepararJogador(Jogador *jogador, const char *nome, char simbolo,
                             int linha, int coluna) {
@@ -147,11 +237,12 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
     jogo->tempo = 9999;
   }
 
-  prepararJogador(&jogo->p1, "Pinguim Vermelho", 'P', LINHAS - 2, 5);
-  prepararJogador(&jogo->p2, "Pinguim Amarelo", 'Y', LINHAS - 2, COLUNAS - 6);
+  prepararJogador(&jogo->p1, texto("Red Penguin", "Pinguim Vermelho"), 'P',
+                  LINHAS - 2, 5);
+  prepararJogador(&jogo->p2, texto("Yellow Penguin", "Pinguim Amarelo"), 'Y',
+                  LINHAS - 2, COLUNAS - 6);
 
-  gerarPeixe(&jogo->peixe);
-}
+gerarPeixeSeguro(jogo);}
 
 static void criarTabuleiro(char tabuleiro[LINHAS][COLUNAS]) {
   // Cria o tabuleiro com limites e água
@@ -199,6 +290,51 @@ static void obterZonaCaptura(const Jogador *jogador, ModoJogo modo,
   }
 }
 
+static int peixeEstaEmCimaDoJogador(const Peixe *peixe, const Jogador *jogador) {
+  return peixe->linha == jogador->linha && peixe->coluna == jogador->coluna;
+}
+
+static int peixeEstaEmZonaCaptura(const Peixe *peixe, const Jogador *jogador,
+                                  ModoJogo modo, int numeroJogador) {
+  int linhaCaptura;
+  int colunaCaptura;
+
+  obterZonaCaptura(jogador, modo, numeroJogador, &linhaCaptura, &colunaCaptura);
+
+  return peixe->linha == linhaCaptura && peixe->coluna == colunaCaptura;
+}
+
+static int posicaoPeixeValida(const EstadoJogo *jogo) {
+  if (peixeEstaEmCimaDoJogador(&jogo->peixe, &jogo->p1)) {
+    return 0;
+  }
+
+  if (peixeEstaEmZonaCaptura(&jogo->peixe, &jogo->p1, jogo->modo, 1)) {
+    return 0;
+  }
+
+  if (jogo->jogadores == 2) {
+    if (peixeEstaEmCimaDoJogador(&jogo->peixe, &jogo->p2)) {
+      return 0;
+    }
+
+    if (peixeEstaEmZonaCaptura(&jogo->peixe, &jogo->p2, jogo->modo, 2)) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void gerarPeixeSeguro(EstadoJogo *jogo) {
+  int tentativas = 0;
+
+  do {
+    gerarPeixe(&jogo->peixe);
+    tentativas++;
+  } while (!posicaoPeixeValida(jogo) && tentativas < 100);
+}
+
 static void desenharJogo(const EstadoJogo *jogo) {
   char tabuleiro[LINHAS][COLUNAS];
   int linhaCaptura;
@@ -240,55 +376,77 @@ static void desenharJogo(const EstadoJogo *jogo) {
 
   erase();
 
-  mvprintw(0, 0, "Penguin Fishing Game");
-  mvprintw(1, 0, "Modo: %s", nomeModo(jogo->modo));
+  mvprintw(0, 0, "%s",
+           texto("Penguin Fishing Game", "Jogo de Pesca dos Pinguins"));
+  mvprintw(1, 0, "%s: %s", texto("Mode", "Modo"), nomeModo(jogo->modo));
   mvprintw(2, 0, "%s", objetivoModo(jogo->modo));
 
   if (jogo->tempo == 9999) {
-    mvprintw(3, 0, "Tempo: pratica infinita");
+    mvprintw(3, 0, "%s",
+             texto("Time: unlimited practice", "Tempo: pratica sem limite"));
   } else {
-    mvprintw(3, 0, "Tempo: %d", jogo->tempo);
+    mvprintw(3, 0, "%s: %d", texto("Time", "Tempo"), jogo->tempo);
   }
 
-  mvprintw(4, 0, "P1: WASD | P2: setas | Q: sair");
+  if (jogo->jogadores == 2) {
+    mvprintw(4, 0, "%s",
+             texto("P1: WASD | P2: arrows | Q: quit",
+                   "P1: WASD | P2: setas | Q: sair"));
+  } else {
+    mvprintw(4, 0, "%s", texto("P1: WASD | Q: quit", "P1: WASD | Q: sair"));
+  }
 
   // Mostra apenas a legenda relevante para o modo escolhido
   if (jogo->modo == EMPILHAR) {
     if (jogo->jogadores == 2) {
-      mvprintw(5, 0,
-               "Legenda: P = jogador 1 | Y = jogador 2 | F/R/Y = peixes | B/b "
-               "= tigela");
+      mvprintw(
+          5, 0, "%s",
+          texto(
+              "Legend: P = player 1 | Y = player 2 | F/R/Y = fish | B/b = bowl",
+              "Legenda: P = jogador 1 | Y = jogador 2 | F/R/Y = peixes | B/b = "
+              "tigela"));
     } else {
-      mvprintw(5, 0, "Legenda: P = jogador | F/R/Y = peixes | B = tigela");
+      mvprintw(5, 0, "%s",
+               texto("Legend: P = player | F/R/Y = fish | B = bowl",
+                     "Legenda: P = jogador | F/R/Y = peixes | B = tigela"));
     }
   } else {
     if (jogo->jogadores == 2) {
-      mvprintw(5, 0,
-               "Legenda: P = jogador 1 | Y = jogador 2 | F/R/Y = peixes | H/h "
-               "= anzol");
+      mvprintw(
+          5, 0, "%s",
+          texto(
+              "Legend: P = player 1 | Y = player 2 | F/R/Y = fish | H/h = hook",
+              "Legenda: P = jogador 1 | Y = jogador 2 | F/R/Y = peixes | H/h = "
+              "anzol"));
     } else {
-      mvprintw(5, 0, "Legenda: P = jogador | F/R/Y = peixes | H = anzol");
+      mvprintw(5, 0, "%s",
+               texto("Legend: P = player | F/R/Y = fish | H = hook",
+                     "Legenda: P = jogador | F/R/Y = peixes | H = anzol"));
     }
   }
 
-  // Mostra apenas a pontuação importante para o modo escolhido
+  // Mostra apenas a pontuacao importante para o modo escolhido
   if (jogo->modo == MAIS_PEIXES) {
-    mvprintw(7, 0, "P1 peixes: %d", jogo->p1.peixes);
+    mvprintw(7, 0, texto("P1 fish: %d", "P1 peixes: %d"), jogo->p1.peixes);
 
     if (jogo->jogadores == 2) {
-      mvprintw(8, 0, "P2 peixes: %d", jogo->p2.peixes);
+      mvprintw(8, 0, texto("P2 fish: %d", "P2 peixes: %d"), jogo->p2.peixes);
     }
   } else if (jogo->modo == MAIS_PESO) {
-    mvprintw(7, 0, "P1 peso total: %d", jogo->p1.peso);
+    mvprintw(7, 0, texto("P1 total weight: %d", "P1 peso total: %d"),
+             jogo->p1.peso);
 
     if (jogo->jogadores == 2) {
-      mvprintw(8, 0, "P2 peso total: %d", jogo->p2.peso);
+      mvprintw(8, 0, texto("P2 total weight: %d", "P2 peso total: %d"),
+               jogo->p2.peso);
     }
   } else if (jogo->modo == EMPILHAR) {
-    mvprintw(7, 0, "P1 peixes empilhados: %d", jogo->p1.empilhados);
+    mvprintw(7, 0, texto("P1 stacked fish: %d", "P1 peixes empilhados: %d"),
+             jogo->p1.empilhados);
 
     if (jogo->jogadores == 2) {
-      mvprintw(8, 0, "P2 peixes empilhados: %d", jogo->p2.empilhados);
+      mvprintw(8, 0, texto("P2 stacked fish: %d", "P2 peixes empilhados: %d"),
+               jogo->p2.empilhados);
     }
   }
 
@@ -423,7 +581,7 @@ static void verificarCapturas(EstadoJogo *jogo) {
   // Verifica captura do jogador 1
   if (jogadorCapturou(&jogo->p1, &jogo->peixe, jogo->modo, 1)) {
     aplicarPontuacao(jogo, 1);
-    gerarPeixe(&jogo->peixe);
+    gerarPeixeSeguro(jogo);
     return;
   }
 
@@ -431,7 +589,7 @@ static void verificarCapturas(EstadoJogo *jogo) {
   if (jogo->jogadores == 2 &&
       jogadorCapturou(&jogo->p2, &jogo->peixe, jogo->modo, 2)) {
     aplicarPontuacao(jogo, 2);
-    gerarPeixe(&jogo->peixe);
+    gerarPeixeSeguro(jogo);
   }
 }
 
@@ -504,25 +662,26 @@ void mostrarResultado(const EstadoJogo *jogo) {
   const char *unidade = "";
 
   printf("\n==============================\n");
-  printf("          FIM DO JOGO\n");
+  printf("          %s\n", texto("GAME OVER", "FIM DO JOGO"));
   printf("==============================\n");
 
   // Define que valor vai ser usado para comparar os jogadores
   if (jogo->modo == MAIS_PEIXES) {
     valorP1 = jogo->p1.peixes;
     valorP2 = jogo->p2.peixes;
-    tipoResultado = "Resultado por peixes";
-    unidade = "peixes";
+    tipoResultado = texto("Result by fish", "Resultado por peixes");
+    unidade = texto("fish", "peixes");
   } else if (jogo->modo == MAIS_PESO) {
     valorP1 = jogo->p1.peso;
     valorP2 = jogo->p2.peso;
-    tipoResultado = "Resultado por peso";
-    unidade = "peso";
+    tipoResultado = texto("Result by weight", "Resultado por peso");
+    unidade = texto("weight", "peso");
   } else if (jogo->modo == EMPILHAR) {
     valorP1 = jogo->p1.empilhados;
     valorP2 = jogo->p2.empilhados;
-    tipoResultado = "Resultado por peixes empilhados";
-    unidade = "empilhados";
+    tipoResultado =
+        texto("Result by stacked fish", "Resultado por peixes empilhados");
+    unidade = texto("stacked fish", "peixes empilhados");
   }
 
   printf("%s:\n", tipoResultado);
@@ -530,18 +689,19 @@ void mostrarResultado(const EstadoJogo *jogo) {
 
   if (jogo->jogadores == 2) {
     printf("P2: %d %s\n", valorP2, unidade);
-
     printf("\n");
 
     if (valorP1 > valorP2) {
-      printf("Vencedor: Jogador 1\n");
+      printf("%s\n", texto("Winner: Player 1", "Vencedor: Jogador 1"));
     } else if (valorP2 > valorP1) {
-      printf("Vencedor: Jogador 2\n");
+      printf("%s\n", texto("Winner: Player 2", "Vencedor: Jogador 2"));
     } else {
-      printf("Resultado: empate\n");
+      printf("%s\n", texto("Result: draw", "Resultado: empate"));
     }
   } else {
-    printf("\nPontuacao final do jogador: %d %s\n", valorP1, unidade);
+    printf("\n%s: %d %s\n",
+           texto("Final player score", "Pontuacao final do jogador"), valorP1,
+           unidade);
   }
 
   printf("==============================\n");

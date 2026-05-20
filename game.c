@@ -220,6 +220,7 @@ static void gerarPeixe(Peixe *peixe) {
 
 void iniciarJogo(EstadoJogo *jogo, int opcao) {
   jogo->ativo = 1;
+  jogo->interrompidoPeloJogador = 0;
 
   // Define se o jogo tem 1 ou 2 jogadores
   if (opcao >= 1 && opcao <= 3) {
@@ -619,11 +620,12 @@ void cicloJogo(EstadoJogo *jogo) {
   curs_set(0);
 
   while (jogo->ativo && jogo->tempo > 0) {
-    // Lê uma tecla por ciclo
+    // Le uma tecla por ciclo
     tecla = getch();
 
     if (tecla != ERR) {
       if (tecla == 'q' || tecla == 'Q') {
+        jogo->interrompidoPeloJogador = 1;
         jogo->ativo = 0;
         break;
       }
@@ -676,6 +678,11 @@ void mostrarResultado(const EstadoJogo *jogo) {
   printf("\n==============================\n");
   printf("          %s\n", texto("GAME OVER", "FIM DO JOGO"));
   printf("==============================\n");
+
+if (jogo->interrompidoPeloJogador) {
+  printf("%s\n\n", texto("Game interrupted by the player",
+                         "Jogo interrompido pelo jogador"));
+}
 
   // Define que valor vai ser usado para comparar os jogadores
   if (jogo->modo == MAIS_PEIXES) {

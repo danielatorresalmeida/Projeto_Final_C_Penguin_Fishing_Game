@@ -34,6 +34,7 @@ typedef struct {
 typedef struct {
   int jogadores;
   ModoJogo modo;
+  int interrompidoPeloJogador;
   int tempo;
   int ativo;
   Jogador p1;

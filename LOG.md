@@ -53,7 +53,8 @@ A maior dificuldade foi reorganizar o ciclo principal do jogo sem quebrar o movi
 Resolvi reorganizando o ciclo do jogo para seguir uma ordem mais clara: ler a tecla, atualizar o estado do jogo, mover o peixe, verificar capturas, atualizar o tempo, desenhar o ecrã e só depois fazer `refresh()`. Também corrigi as chavetas da função `cicloJogo()` e passei a apagar o executável antigo antes de compilar quando necessário. Para o menu, melhorei a validação da opção escolhida e adicionei suporte ao idioma selecionado.
 
 **Próximo passo planeado:**
-O próximo passo será adicionar a opção de guardar o jogo durante a partida usando a tecla `S`. Depois disso, pretendo criar uma opção no menu principal para retomar um jogo guardado.
+O próximo passo será adicionar a opção de guardar o jogo durante a partida, usando uma tecla apropriada e evitando conflito com os controlos atuais. Também pretendo criar uma opção no menu principal para retomar um jogo guardado.
 
+Além disso, pretendo melhorar a validação das entradas do utilizador. Em C não existe `try`/`catch` como em outras linguagens, por isso a validação será feita através da verificação do input. A ideia é substituir o uso de `atoi()` por uma solução mais segura, como `strtol()`, para evitar que comandos mal digitados, como letras ou símbolos, sejam interpretados como uma opção válida.
 **Linhas de código escritas ou alteradas (estimativa):**
 180

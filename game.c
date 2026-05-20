@@ -24,11 +24,29 @@ void mostrarMenu(void) {
 
 int lerOpcao(void) {
     char linha[20];
+    int opcao;
 
-    // Lê a opção como texto para evitar problemas com scanf
-    fgets(linha, sizeof(linha), stdin);
+    while (1) {
+        // Lê a opção como texto
+        if (fgets(linha, sizeof(linha), stdin) == NULL) {
+            return 0;
+        }
 
-    return atoi(linha);
+        // Se o utilizador só carregar ENTER, pede outra vez
+        if (linha[0] == '\n') {
+            printf("Escolhe uma opcao: ");
+            continue;
+        }
+
+        opcao = atoi(linha);
+
+        // Só aceita opções entre 0 e 9
+        if (opcao >= 0 && opcao <= 9) {
+            return opcao;
+        }
+
+        printf("Opcao invalida. Escolhe uma opcao entre 0 e 9: ");
+    }
 }
 
 const char *nomeModo(ModoJogo modo) {
@@ -119,10 +137,16 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
 }
 
 static void criarTabuleiro(char tabuleiro[LINHAS][COLUNAS]) {
-    // Preenche o tabuleiro com pontos
+    // Cria o tabuleiro com limites e água
     for (int i = 0; i < LINHAS; i++) {
         for (int j = 0; j < COLUNAS; j++) {
-            tabuleiro[i][j] = '.';
+
+            // Bordas do tabuleiro
+            if (i == 0 || i == LINHAS - 1 || j == 0 || j == COLUNAS - 1) {
+                tabuleiro[i][j] = '#';
+            } else {
+                tabuleiro[i][j] = '~';
+            }
         }
     }
 }
@@ -204,14 +228,15 @@ static void desenharJogo(const EstadoJogo *jogo) {
     }
 
     mvprintw(3, 0, "P1: WASD | P2: setas | Q: sair");
+    mvprintw(4, 0, "Legenda: PR/PY = jogadores | F/R/Y = peixes | H/h = anzol | BR/BY = tigela");
 
-    mvprintw(5, 0, "P1 peixes=%d peso=%d empilhados=%d",
-             jogo->p1.peixes,
-             jogo->p1.peso,
-             jogo->p1.empilhados);
+    mvprintw(6, 0, "P1 peixes=%d peso=%d empilhados=%d",
+         jogo->p1.peixes,
+         jogo->p1.peso,
+         jogo->p1.empilhados);
 
-    if (jogo->jogadores == 2) {
-        mvprintw(6, 0, "P2 peixes=%d peso=%d empilhados=%d",
+if (jogo->jogadores == 2) {
+        mvprintw(7, 0, "P2 peixes=%d peso=%d empilhados=%d",
                  jogo->p2.peixes,
                  jogo->p2.peso,
                  jogo->p2.empilhados);
@@ -220,7 +245,7 @@ static void desenharJogo(const EstadoJogo *jogo) {
     // Desenha a matriz do jogo
     for (int i = 0; i < LINHAS; i++) {
         for (int j = 0; j < COLUNAS; j++) {
-            mvaddch(i + 8, j, tabuleiro[i][j]);
+            mvaddch(i + 9, j, tabuleiro[i][j]);
         }
     }
 }
@@ -229,7 +254,7 @@ static void moverJogador1(Jogador *jogador, int tecla) {
     // Movimento do jogador 1 com WASD
     if ((tecla == 'w' || tecla == 'W') && jogador->linha > 1) {
         jogador->linha--;
-    } else if ((tecla == 's' || tecla == 'S') && jogador->linha < LINHAS - 1) {
+    } else if ((tecla == 's' || tecla == 'S') && jogador->linha < LINHAS - 2) {
         jogador->linha++;
     } else if ((tecla == 'a' || tecla == 'A') && jogador->coluna > 1) {
         jogador->coluna--;
@@ -242,7 +267,7 @@ static void moverJogador2(Jogador *jogador, int tecla) {
     // Movimento do jogador 2 com setas
     if (tecla == KEY_UP && jogador->linha > 1) {
         jogador->linha--;
-    } else if (tecla == KEY_DOWN && jogador->linha < LINHAS - 1) {
+    } else if (tecla == KEY_DOWN && jogador->linha < LINHAS - 2) {
         jogador->linha++;
     } else if (tecla == KEY_LEFT && jogador->coluna > 1) {
         jogador->coluna--;
@@ -362,7 +387,6 @@ static void verificarCapturas(EstadoJogo *jogo) {
 
 void cicloJogo(EstadoJogo *jogo) {
     int tecla;
-    int ultimaTecla;
     int contadorMovimentoPeixe = 0;
     time_t ultimoSegundo = time(NULL);
 
@@ -372,38 +396,28 @@ void cicloJogo(EstadoJogo *jogo) {
     noecho();
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
-    set_escdelay(25);
     curs_set(0);
 
     while (jogo->ativo && jogo->tempo > 0) {
-        ultimaTecla = ERR;
-
-        // Lê todas as teclas acumuladas
+        // Lê uma tecla por ciclo
         tecla = getch();
 
-        while (tecla != ERR) {
-            ultimaTecla = tecla;
-            tecla = getch();
-        }
-
-        // Processa apenas a tecla mais recente
-        if (ultimaTecla != ERR) {
-            if (ultimaTecla == 'q' || ultimaTecla == 'Q') {
+        if (tecla != ERR) {
+            if (tecla == 'q' || tecla == 'Q') {
                 jogo->ativo = 0;
                 break;
             }
 
-            moverJogador1(&jogo->p1, ultimaTecla);
+            // Movimento do jogador 1
+            moverJogador1(&jogo->p1, tecla);
 
+            // Movimento do jogador 2, se existir
             if (jogo->jogadores == 2) {
-                moverJogador2(&jogo->p2, ultimaTecla);
+                moverJogador2(&jogo->p2, tecla);
             }
-
-            // Limpa teclas antigas para reduzir atraso
-            flushinp();
         }
 
-        // O peixe mexe a cada alguns frames
+        // O peixe mexe a cada alguns ciclos
         contadorMovimentoPeixe++;
 
         if (contadorMovimentoPeixe >= 5) {
@@ -419,11 +433,11 @@ void cicloJogo(EstadoJogo *jogo) {
             ultimoSegundo = time(NULL);
         }
 
-        // Desenha tudo depois das atualizações
+        // Desenha o jogo no fim do ciclo
         desenharJogo(jogo);
         refresh();
 
-        // Pequena pausa para controlar a velocidade do jogo
+        // Controla a velocidade do jogo
         napms(35);
     }
 

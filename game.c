@@ -448,34 +448,51 @@ void cicloJogo(EstadoJogo *jogo) {
 }
 
 void mostrarResultado(const EstadoJogo *jogo) {
+    int valorP1 = 0;
+    int valorP2 = 0;
+    const char *tipoResultado = "";
+    const char *unidade = "";
+
     printf("\n==============================\n");
     printf("          FIM DO JOGO\n");
     printf("==============================\n");
 
+    // Define que valor vai ser usado para comparar os jogadores
     if (jogo->modo == MAIS_PEIXES) {
-        printf("Resultado por peixes:\n");
-        printf("P1: %d peixes\n", jogo->p1.peixes);
-
-        if (jogo->jogadores == 2) {
-            printf("P2: %d peixes\n", jogo->p2.peixes);
-        }
+        valorP1 = jogo->p1.peixes;
+        valorP2 = jogo->p2.peixes;
+        tipoResultado = "Resultado por peixes";
+        unidade = "peixes";
+    } else if (jogo->modo == MAIS_PESO) {
+        valorP1 = jogo->p1.peso;
+        valorP2 = jogo->p2.peso;
+        tipoResultado = "Resultado por peso";
+        unidade = "peso";
+    } else if (jogo->modo == EMPILHAR) {
+        valorP1 = jogo->p1.empilhados;
+        valorP2 = jogo->p2.empilhados;
+        tipoResultado = "Resultado por peixes empilhados";
+        unidade = "empilhados";
     }
 
-    if (jogo->modo == MAIS_PESO) {
-        printf("Resultado por peso:\n");
-        printf("P1: %d peso\n", jogo->p1.peso);
+    printf("%s:\n", tipoResultado);
+    printf("P1: %d %s\n", valorP1, unidade);
 
-        if (jogo->jogadores == 2) {
-            printf("P2: %d peso\n", jogo->p2.peso);
+    if (jogo->jogadores == 2) {
+        printf("P2: %d %s\n", valorP2, unidade);
+
+        printf("\n");
+
+        if (valorP1 > valorP2) {
+            printf("Vencedor: Jogador 1\n");
+        } else if (valorP2 > valorP1) {
+            printf("Vencedor: Jogador 2\n");
+        } else {
+            printf("Resultado: empate\n");
         }
+    } else {
+        printf("\nPontuacao final do jogador: %d %s\n", valorP1, unidade);
     }
 
-    if (jogo->modo == EMPILHAR) {
-        printf("Resultado por peixes empilhados:\n");
-        printf("P1: %d empilhados\n", jogo->p1.empilhados);
-
-        if (jogo->jogadores == 2) {
-            printf("P2: %d empilhados\n", jogo->p2.empilhados);
-        }
-    }
+    printf("==============================\n");
 }

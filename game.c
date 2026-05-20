@@ -51,13 +51,15 @@ static void imprimirTitulo(const char *titulo) {
 
 static void escolherIdioma(void) {
   char linha[20];
-  int opcao = 0;
+  int opcao = -1;
 
   while (opcao != 1 && opcao != 2) {
     printf("\n");
     imprimirTitulo("LANGUAGE / IDIOMA");
+
     printf("1 - English\n");
     printf("2 - Portugues\n");
+    printf("0 - Exit / Sair\n");
     printf("Option / Opcao: ");
 
     if (fgets(linha, sizeof(linha), stdin) == NULL) {
@@ -66,9 +68,17 @@ static void escolherIdioma(void) {
       return;
     }
 
+    if (linha[0] == '\n') {
+      printf("Invalid option / Opcao invalida.\n");
+      continue;
+    }
+
     opcao = atoi(linha);
 
-    if (opcao == 1) {
+    if (opcao == 0) {
+      printf("\nExiting game / A sair do jogo...\n");
+      exit(0);
+    } else if (opcao == 1) {
       idiomaAtual = IDIOMA_EN;
     } else if (opcao == 2) {
       idiomaAtual = IDIOMA_PT;
@@ -242,7 +252,8 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
   prepararJogador(&jogo->p2, texto("Yellow Penguin", "Pinguim Amarelo"), 'Y',
                   LINHAS - 2, COLUNAS - 6);
 
-gerarPeixeSeguro(jogo);}
+  gerarPeixeSeguro(jogo);
+}
 
 static void criarTabuleiro(char tabuleiro[LINHAS][COLUNAS]) {
   // Cria o tabuleiro com limites e água
@@ -290,7 +301,8 @@ static void obterZonaCaptura(const Jogador *jogador, ModoJogo modo,
   }
 }
 
-static int peixeEstaEmCimaDoJogador(const Peixe *peixe, const Jogador *jogador) {
+static int peixeEstaEmCimaDoJogador(const Peixe *peixe,
+                                    const Jogador *jogador) {
   return peixe->linha == jogador->linha && peixe->coluna == jogador->coluna;
 }
 

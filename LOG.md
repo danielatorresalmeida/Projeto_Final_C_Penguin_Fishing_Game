@@ -163,3 +163,26 @@ Criei constantes para a posição inicial do tabuleiro e passei a desenhar o tab
 **Próximo passo planeado:**
 
 Melhorar o resultado final, mostrando de forma mais clara o vencedor nos modos de dois jogadores.
+
+## Sessão 4
+
+**Funcionalidades implementadas:**
+
+- Organização do código em vários ficheiros.
+- Separação do menu, lógica do jogo e desenho visual.
+- Redução do tamanho e complexidade do ficheiro `game.c`.
+- Manutenção da validação com `strtol()`.
+- Manutenção das cores dos jogadores e peixes.
+- Pontuação apresentada conforme o modo escolhido.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi separar o código sem alterar o comportamento do jogo.
+
+**Como resolvi:**
+
+Dividi o projeto em ficheiros com responsabilidades diferentes: menu, lógica, renderização e ciclo principal.
+
+**Próximo passo planeado:**
+
+Melhorar o resultado final, mostrando o vencedor de forma mais clara nos modos de dois jogadores.

@@ -45,8 +45,6 @@ typedef struct {
   Peixe peixe;
 } EstadoJogo;
 
-void mostrarMenu(void);
-int lerOpcao(void);
 void iniciarJogo(EstadoJogo *jogo, int opcao);
 void cicloJogo(EstadoJogo *jogo);
 void mostrarResultado(const EstadoJogo *jogo);

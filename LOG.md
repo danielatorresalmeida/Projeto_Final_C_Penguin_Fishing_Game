@@ -27,6 +27,7 @@ Resolvi instalando os pacotes necessários no MSYS2 e ajustando o comando de com
 Melhorar a resposta do movimento das teclas e reduzir o tremor do ecrã durante o jogo. Para isso, pretendo testar o uso de `erase()`, `refresh()` e `flushinp()` dentro do ciclo principal do jogo.
 
 **Linhas de código escritas (estimativa):**
+<<<<<<< HEAD
 
 350
 
@@ -101,3 +102,42 @@ Melhorar ainda mais a UX visual para tornar mais claro quais peixes pertencem a 
 **Linhas de código escritas (estimativa):**
 
 200
+=======
+350
+
+## Sessão 2 - 20/05/2026
+
+**Funcionalidades implementadas:**
+- Melhoria da fluidez do jogo no terminal.
+- Substituição de `clear()` por `erase()` para reduzir o tremor do ecrã.
+- Alteração do ciclo principal do jogo para desenhar o tabuleiro depois das atualizações.
+- Remoção do `refresh()` de dentro da função `desenharJogo()`.
+- Colocação do `refresh()` no fim do ciclo principal.
+- Redução do tempo de pausa com `napms(35)` para melhorar a resposta do movimento.
+- Correção do problema em que o jogador deixava de se mover após alterações no ciclo do jogo.
+- Correção da leitura do menu para evitar que carregar apenas em ENTER fosse interpretado como opção 0.
+- Melhoria visual do tabuleiro, com bordas e representação da água.
+- Ajuste da pontuação apresentada no ecrã, mostrando apenas a pontuação relevante para cada modo de jogo.
+- Ajuste da legenda, mostrando apenas os elementos importantes para o modo escolhido.
+- Criação de um resultado final com indicação do vencedor nos modos de dois jogadores.
+- Adição da escolha de idioma no início do programa.
+- Implementação de suporte para inglês e português europeu nos menus, objetivos, legendas, pontuação e resultados.
+- Adição da opção 10 no menu principal para mudar o idioma.
+- Adição da opção 0 no menu de escolha de idioma para sair do jogo.
+- Ajuste automático das linhas dos títulos para ficarem proporcionais ao texto apresentado.
+- Implementação da indicação de jogo interrompido pelo jogador quando é usada a tecla `Q`.
+- Ajuste para mostrar a pontuação final mesmo quando o jogo é interrompido pelo jogador.
+
+**Maior dificuldade:**
+A maior dificuldade foi reorganizar o ciclo principal do jogo sem quebrar o movimento dos jogadores. Também houve alguns erros com chavetas no código, que fizeram partes da função `cicloJogo()` ficarem fora da função. Além disso, foi necessário corrigir problemas de compilação causados pelo executável antigo ainda estar aberto.
+
+**Como resolvi:**
+Resolvi reorganizando o ciclo do jogo para seguir uma ordem mais clara: ler a tecla, atualizar o estado do jogo, mover o peixe, verificar capturas, atualizar o tempo, desenhar o ecrã e só depois fazer `refresh()`. Também corrigi as chavetas da função `cicloJogo()` e passei a apagar o executável antigo antes de compilar quando necessário. Para o menu, melhorei a validação da opção escolhida e adicionei suporte ao idioma selecionado.
+
+**Próximo passo planeado:**
+O próximo passo será adicionar a opção de guardar o jogo durante a partida, usando uma tecla apropriada e evitando conflito com os controlos atuais. Também pretendo criar uma opção no menu principal para retomar um jogo guardado.
+
+Além disso, pretendo melhorar a validação das entradas do utilizador. Em C não existe `try`/`catch` como em outras linguagens, por isso a validação será feita através da verificação do input. A ideia é substituir o uso de `atoi()` por uma solução mais segura, como `strtol()`, para evitar que comandos mal digitados, como letras ou símbolos, sejam interpretados como uma opção válida.
+**Linhas de código escritas ou alteradas (estimativa):**
+180
+>>>>>>> 0a2d2b21c1cbd284349dd59a68490cad2379f9c9

@@ -160,7 +160,6 @@ static void desenharCelula(int linha, int coluna, char simbolo) {
 
 static void prepararJogador(Jogador *jogador, const char *nome, char simbolo,
                             int linha, int coluna) {
-  // Prepara os dados iniciais de um jogador
   strcpy(jogador->nome, nome);
   jogador->simbolo = simbolo;
   jogador->linha = linha;
@@ -170,10 +169,29 @@ static void prepararJogador(Jogador *jogador, const char *nome, char simbolo,
   jogador->empilhados = 0;
 }
 
-static void gerarPeixe(Peixe *peixe) {
-  // Gera um peixe numa posicao aleatoria
-  peixe->linha = 2 + rand() % (LINHAS - 4);
-  peixe->coluna = 2 + rand() % (COLUNAS - 4);
+static int posicaoOcupada(const EstadoJogo *jogo, int linha, int coluna) {
+  if (linha == jogo->p1.linha && coluna == jogo->p1.coluna) {
+    return 1;
+  }
+
+  if (linha == jogo->p1.linha && coluna == jogo->p1.coluna + 1) {
+    return 1;
+  }
+
+  if (jogo->jogadores == 2) {
+    if (linha == jogo->p2.linha && coluna == jogo->p2.coluna) {
+      return 1;
+    }
+
+    if (linha == jogo->p2.linha && coluna == jogo->p2.coluna + 1) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static void definirTipoPeixe(Peixe *peixe) {
   peixe->cor = rand() % 3;
   peixe->tipo = 1 + rand() % 3;
   peixe->ativo = 1;
@@ -195,19 +213,28 @@ static void gerarPeixe(Peixe *peixe) {
   }
 }
 
+static void gerarPeixe(EstadoJogo *jogo) {
+  int tentativas = 0;
+
+  definirTipoPeixe(&jogo->peixe);
+
+  do {
+    jogo->peixe.linha = 2 + rand() % (LINHAS - 4);
+    jogo->peixe.coluna = 2 + rand() % (COLUNAS - 4);
+    tentativas++;
+  } while (posicaoOcupada(jogo, jogo->peixe.linha, jogo->peixe.coluna) &&
+           tentativas < 100);
+}
+
 void iniciarJogo(EstadoJogo *jogo, int opcao) {
   jogo->ativo = 1;
 
-  // Define se o jogo tem 1 ou 2 jogadores
-  if (opcao >= 1 && opcao <= 3) {
-    jogo->jogadores = 1;
-  } else if (opcao >= 7 && opcao <= 9) {
+  if ((opcao >= 1 && opcao <= 3) || (opcao >= 7 && opcao <= 9)) {
     jogo->jogadores = 1;
   } else {
     jogo->jogadores = 2;
   }
 
-  // Define o modo de jogo
   if (opcao == 1 || opcao == 4 || opcao == 7) {
     jogo->modo = MAIS_PEIXES;
     jogo->tempo = 60;
@@ -219,7 +246,6 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
     jogo->tempo = 60;
   }
 
-  // Modos de pratica têm tempo muito alto
   if (opcao >= 7 && opcao <= 9) {
     jogo->tempo = 9999;
   }
@@ -227,11 +253,10 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
   prepararJogador(&jogo->p1, "Pinguim Vermelho", 'P', LINHAS - 2, 5);
   prepararJogador(&jogo->p2, "Pinguim Amarelo", 'Y', LINHAS - 2, COLUNAS - 6);
 
-  gerarPeixe(&jogo->peixe);
+  gerarPeixe(jogo);
 }
 
 static void criarTabuleiro(char tabuleiro[LINHAS][COLUNAS]) {
-  // Preenche o tabuleiro com pontos
   for (int i = 0; i < LINHAS; i++) {
     for (int j = 0; j < COLUNAS; j++) {
       tabuleiro[i][j] = '.';
@@ -245,7 +270,6 @@ static int dentroDoTabuleiro(int linha, int coluna) {
 
 static void colocarNoTabuleiro(char tabuleiro[LINHAS][COLUNAS], int linha,
                                int coluna, char simbolo) {
-  // Só coloca símbolos dentro dos limites
   if (dentroDoTabuleiro(linha, coluna)) {
     tabuleiro[linha][coluna] = simbolo;
   }
@@ -275,13 +299,11 @@ static void desenharJogo(const EstadoJogo *jogo) {
 
   criarTabuleiro(tabuleiro);
 
-  // Coloca o peixe no tabuleiro.
   if (jogo->peixe.ativo) {
     colocarNoTabuleiro(tabuleiro, jogo->peixe.linha, jogo->peixe.coluna,
                        jogo->peixe.simbolo);
   }
 
-  // Coloca a zona de captura do jogador 1.
   obterZonaCaptura(&jogo->p1, jogo->modo, 1, &linhaCaptura, &colunaCaptura);
 
   if (jogo->modo == EMPILHAR) {
@@ -290,7 +312,6 @@ static void desenharJogo(const EstadoJogo *jogo) {
     colocarNoTabuleiro(tabuleiro, linhaCaptura, colunaCaptura, 'H');
   }
 
-  // Coloca a zona de captura do jogador 2, se existir.
   if (jogo->jogadores == 2) {
     obterZonaCaptura(&jogo->p2, jogo->modo, 2, &linhaCaptura, &colunaCaptura);
 
@@ -312,7 +333,7 @@ static void desenharJogo(const EstadoJogo *jogo) {
     mvprintw(2, 0, "Tempo: %d", jogo->tempo);
   }
 
-  mvprintw(3, 0, "P1: WASD | P2: setas | Q: sair");
+  mvprintw(3, 0, "Controlos: PR = WASD | PY = setas | Q = sair");
 
   desenharTextoComCor(5, 0, "PR", COR_JOGADOR_1);
   mvprintw(5, 3, "peixes=%d peso=%d empilhados=%d", jogo->p1.peixes,
@@ -324,18 +345,25 @@ static void desenharJogo(const EstadoJogo *jogo) {
              jogo->p2.peso, jogo->p2.empilhados);
   }
 
-  // Desenha a matriz do jogo.
+  mvprintw(7, 0, "Legenda: ");
+  desenharTextoComCor(7, 9, "R", COR_PEIXE_VERMELHO);
+  mvprintw(7, 11, "= peixe vermelho | ");
+  desenharTextoComCor(7, 31, "Y", COR_PEIXE_AMARELO);
+  mvprintw(7, 33, "= peixe amarelo | ");
+  desenharTextoComCor(7, 52, "F", COR_PEIXE_NORMAL);
+  mvprintw(7, 54, "= peixe neutro");
+
   for (int i = 0; i < LINHAS; i++) {
     for (int j = 0; j < COLUNAS; j++) {
-      desenharCelula(i + 8, j, tabuleiro[i][j]);
+      desenharCelula(i + 9, j, tabuleiro[i][j]);
     }
   }
 
-  // Desenha os jogadores com dois caracteres e cores próprias.
-  desenharTextoComCor(jogo->p1.linha + 8, jogo->p1.coluna, "PR", COR_JOGADOR_1);
+  desenharTextoComCor(jogo->p1.linha + 9, jogo->p1.coluna, "PR",
+                      COR_JOGADOR_1);
 
   if (jogo->jogadores == 2) {
-    desenharTextoComCor(jogo->p2.linha + 8, jogo->p2.coluna, "PY",
+    desenharTextoComCor(jogo->p2.linha + 9, jogo->p2.coluna, "PY",
                         COR_JOGADOR_2);
   }
 
@@ -343,7 +371,6 @@ static void desenharJogo(const EstadoJogo *jogo) {
 }
 
 static void moverJogador1(Jogador *jogador, int tecla) {
-  // Movimento do jogador 1 com WASD.
   if ((tecla == 'w' || tecla == 'W') && jogador->linha > 1) {
     jogador->linha--;
   } else if ((tecla == 's' || tecla == 'S') && jogador->linha < LINHAS - 1) {
@@ -356,7 +383,6 @@ static void moverJogador1(Jogador *jogador, int tecla) {
 }
 
 static void moverJogador2(Jogador *jogador, int tecla) {
-  // Movimento do jogador 2 com as setas.
   if (tecla == KEY_UP && jogador->linha > 1) {
     jogador->linha--;
   } else if (tecla == KEY_DOWN && jogador->linha < LINHAS - 1) {
@@ -371,7 +397,6 @@ static void moverJogador2(Jogador *jogador, int tecla) {
 static void moverPeixe(Peixe *peixe) {
   int direcao = rand() % 4;
 
-  // Movimento simples e aleatorio do peixe
   if (direcao == 0 && peixe->linha > 1) {
     peixe->linha--;
   } else if (direcao == 1 && peixe->linha < LINHAS - 2) {
@@ -386,7 +411,6 @@ static void moverPeixe(Peixe *peixe) {
 static void aplicarPontuacao(EstadoJogo *jogo, int numeroJogador) {
   Peixe *peixe = &jogo->peixe;
 
-  // Modo 1: ganha quem apanhar mais peixes
   if (jogo->modo == MAIS_PEIXES) {
     if (numeroJogador == 1) {
       if (peixe->cor == 1) {
@@ -407,7 +431,6 @@ static void aplicarPontuacao(EstadoJogo *jogo, int numeroJogador) {
     }
   }
 
-  // Modo 2: ganha quem tiver mais peso
   if (jogo->modo == MAIS_PESO) {
     if (numeroJogador == 1) {
       if (peixe->cor == 1) {
@@ -428,7 +451,6 @@ static void aplicarPontuacao(EstadoJogo *jogo, int numeroJogador) {
     }
   }
 
-  // Modo 3: empilhar peixes
   if (jogo->modo == EMPILHAR) {
     if (numeroJogador == 1) {
       if (peixe->cor == 2) {
@@ -462,18 +484,16 @@ static int jogadorCapturou(const Jogador *jogador, const Peixe *peixe,
 }
 
 static void verificarCapturas(EstadoJogo *jogo) {
-  // Verifica captura do jogador 1
   if (jogadorCapturou(&jogo->p1, &jogo->peixe, jogo->modo, 1)) {
     aplicarPontuacao(jogo, 1);
-    gerarPeixe(&jogo->peixe);
+    gerarPeixe(jogo);
     return;
   }
 
-  // Verifica captura do jogador 2
   if (jogo->jogadores == 2 &&
       jogadorCapturou(&jogo->p2, &jogo->peixe, jogo->modo, 2)) {
     aplicarPontuacao(jogo, 2);
-    gerarPeixe(&jogo->peixe);
+    gerarPeixe(jogo);
   }
 }
 
@@ -482,7 +502,6 @@ void cicloJogo(EstadoJogo *jogo) {
   int contadorMovimentoPeixe = 0;
   time_t ultimoSegundo = time(NULL);
 
-  // Inicializa o ncurses
   initscr();
   cbreak();
   noecho();
@@ -507,7 +526,6 @@ void cicloJogo(EstadoJogo *jogo) {
       moverJogador2(&jogo->p2, tecla);
     }
 
-    // O peixe mexe a cada alguns frames
     contadorMovimentoPeixe++;
 
     if (contadorMovimentoPeixe >= 5) {
@@ -517,7 +535,6 @@ void cicloJogo(EstadoJogo *jogo) {
 
     verificarCapturas(jogo);
 
-    // Diminui o tempo uma vez por segundo
     if (jogo->tempo != 9999 && time(NULL) != ultimoSegundo) {
       jogo->tempo--;
       ultimoSegundo = time(NULL);
@@ -526,7 +543,6 @@ void cicloJogo(EstadoJogo *jogo) {
     napms(80);
   }
 
-  // Fecha o ncurses
   endwin();
 
   jogo->ativo = 0;

@@ -1,8 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
+
 #define OPCAO_INVALIDA -1
 #define OPCAO_MINIMA 0
 #define OPCAO_MAXIMA 10
+
 #define LINHAS 15
 #define COLUNAS 40
 

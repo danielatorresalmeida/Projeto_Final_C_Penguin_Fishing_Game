@@ -31,6 +31,7 @@ void mostrarMenu(void) {
   printf("7 - Pratica: mais peixes\n");
   printf("8 - Pratica: mais peso\n");
   printf("9 - Pratica: empilhar peixes\n");
+  printf("10 - Mudar idioma\n");
   printf("0 - Sair\n");
   printf("Escolhe uma opcao: ");
 }

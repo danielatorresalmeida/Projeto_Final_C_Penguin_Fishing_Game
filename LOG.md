@@ -141,3 +141,25 @@ Além disso, pretendo melhorar a validação das entradas do utilizador. Em C n�
 **Linhas de código escritas ou alteradas (estimativa):**
 180
 >>>>>>> 0a2d2b21c1cbd284349dd59a68490cad2379f9c9
+## Sessão 4 - 08/07/2026
+
+**Funcionalidades implementadas:**
+
+- Melhoria da legenda visual durante o jogo.
+- Identificação mais clara dos jogadores `PR` e `PY`.
+- Identificação visual dos peixes `R`, `Y` e `F`.
+- Adição de bordas ao tabuleiro.
+- Ajuste da posição do tabuleiro para acomodar melhor a legenda.
+- Manutenção das cores dos jogadores e dos peixes com ncurses.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi ajustar as posições do tabuleiro depois de adicionar mais informação visual no ecrã.
+
+**Como resolvi:**
+
+Criei constantes para a posição inicial do tabuleiro e passei a desenhar o tabuleiro com base nessas coordenadas. Também adicionei uma função própria para desenhar a borda, mantendo o código mais organizado.
+
+**Próximo passo planeado:**
+
+Melhorar o resultado final, mostrando de forma mais clara o vencedor nos modos de dois jogadores.

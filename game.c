@@ -13,10 +13,13 @@ enum {
   COR_PEIXE_VERMELHO,
   COR_PEIXE_AMARELO,
   COR_PEIXE_NORMAL,
-  COR_AGUA
+  COR_AGUA,
+  COR_BORDA
 };
 
 static int coresAtivas = 0;
+#define TABULEIRO_LINHA 10
+#define TABULEIRO_COLUNA 2
 
 void mostrarMenu(void) {
   printf("\n==============================\n");
@@ -113,6 +116,7 @@ static void iniciarCores(void) {
   init_pair(COR_PEIXE_AMARELO, COLOR_YELLOW, fundo);
   init_pair(COR_PEIXE_NORMAL, COLOR_GREEN, fundo);
   init_pair(COR_AGUA, COLOR_CYAN, fundo);
+  init_pair(COR_BORDA, COLOR_WHITE, fundo);
 
   coresAtivas = 1;
 }
@@ -189,6 +193,37 @@ static int posicaoOcupada(const EstadoJogo *jogo, int linha, int coluna) {
   }
 
   return 0;
+}
+
+static void desenharBordaTabuleiro(void) {
+  int topo = TABULEIRO_LINHA - 1;
+  int fundo = TABULEIRO_LINHA + LINHAS;
+  int esquerda = TABULEIRO_COLUNA - 1;
+  int direita = TABULEIRO_COLUNA + COLUNAS;
+
+  if (coresAtivas) {
+    attron(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+
+  mvaddch(topo, esquerda, '+');
+  mvaddch(topo, direita, '+');
+  mvaddch(fundo, esquerda, '+');
+  mvaddch(fundo, direita, '+');
+
+  for (int coluna = TABULEIRO_COLUNA; coluna < TABULEIRO_COLUNA + COLUNAS;
+       coluna++) {
+    mvaddch(topo, coluna, '-');
+    mvaddch(fundo, coluna, '-');
+  }
+
+  for (int linha = TABULEIRO_LINHA; linha < TABULEIRO_LINHA + LINHAS; linha++) {
+    mvaddch(linha, esquerda, '|');
+    mvaddch(linha, direita, '|');
+  }
+
+  if (coresAtivas) {
+    attroff(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
 }
 
 static void definirTipoPeixe(Peixe *peixe) {
@@ -336,34 +371,49 @@ static void desenharJogo(const EstadoJogo *jogo) {
   mvprintw(3, 0, "Controlos: PR = WASD | PY = setas | Q = sair");
 
   desenharTextoComCor(5, 0, "PR", COR_JOGADOR_1);
-  mvprintw(5, 3, "peixes=%d peso=%d empilhados=%d", jogo->p1.peixes,
+  mvprintw(5, 3, "= jogador vermelho");
+
+  if (jogo->jogadores == 2) {
+    desenharTextoComCor(5, 25, "PY", COR_JOGADOR_2);
+    mvprintw(5, 28, "= jogador amarelo");
+  }
+
+  desenharTextoComCor(6, 0, "R", COR_PEIXE_VERMELHO);
+  mvprintw(6, 2, "= peixe vermelho");
+
+  desenharTextoComCor(6, 22, "Y", COR_PEIXE_AMARELO);
+  mvprintw(6, 24, "= peixe amarelo");
+
+  desenharTextoComCor(6, 43, "F", COR_PEIXE_NORMAL);
+  mvprintw(6, 45, "= peixe neutro");
+
+  mvprintw(7, 0, "H/h = anzol | B/b = cesto | Q = sair");
+
+  desenharTextoComCor(8, 0, "PR", COR_JOGADOR_1);
+  mvprintw(8, 3, "peixes=%d peso=%d empilhados=%d", jogo->p1.peixes,
            jogo->p1.peso, jogo->p1.empilhados);
 
   if (jogo->jogadores == 2) {
-    desenharTextoComCor(6, 0, "PY", COR_JOGADOR_2);
-    mvprintw(6, 3, "peixes=%d peso=%d empilhados=%d", jogo->p2.peixes,
+    desenharTextoComCor(9, 0, "PY", COR_JOGADOR_2);
+    mvprintw(9, 3, "peixes=%d peso=%d empilhados=%d", jogo->p2.peixes,
              jogo->p2.peso, jogo->p2.empilhados);
   }
 
-  mvprintw(7, 0, "Legenda: ");
-  desenharTextoComCor(7, 9, "R", COR_PEIXE_VERMELHO);
-  mvprintw(7, 11, "= peixe vermelho | ");
-  desenharTextoComCor(7, 31, "Y", COR_PEIXE_AMARELO);
-  mvprintw(7, 33, "= peixe amarelo | ");
-  desenharTextoComCor(7, 52, "F", COR_PEIXE_NORMAL);
-  mvprintw(7, 54, "= peixe neutro");
+  desenharBordaTabuleiro();
 
   for (int i = 0; i < LINHAS; i++) {
     for (int j = 0; j < COLUNAS; j++) {
-      desenharCelula(i + 9, j, tabuleiro[i][j]);
+      desenharCelula(TABULEIRO_LINHA + i, TABULEIRO_COLUNA + j,
+                     tabuleiro[i][j]);
     }
   }
 
-  desenharTextoComCor(jogo->p1.linha + 9, jogo->p1.coluna, "PR",
-                      COR_JOGADOR_1);
+  desenharTextoComCor(TABULEIRO_LINHA + jogo->p1.linha,
+                      TABULEIRO_COLUNA + jogo->p1.coluna, "PR", COR_JOGADOR_1);
 
   if (jogo->jogadores == 2) {
-    desenharTextoComCor(jogo->p2.linha + 9, jogo->p2.coluna, "PY",
+    desenharTextoComCor(TABULEIRO_LINHA + jogo->p2.linha,
+                        TABULEIRO_COLUNA + jogo->p2.coluna, "PY",
                         COR_JOGADOR_2);
   }
 

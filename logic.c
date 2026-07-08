@@ -1,10 +1,14 @@
-#include "game.h"
 #include "logic.h"
-#include <ncurses.h>
+#include "game.h"
+#include <ncursesw/ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#define COR_VERMELHO "\033[1;31m"
+#define COR_AMARELO "\033[1;33m"
+#define COR_RESET "\033[0m"
 
 const char *nomeModo(ModoJogo modo) {
   if (modo == MAIS_PEIXES) {
@@ -120,8 +124,8 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
   gerarPeixe(jogo);
 }
 
-void obterZonaCaptura(const Jogador *jogador, ModoJogo modo,
-                      int numeroJogador, int *linha, int *coluna) {
+void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
+                      int *linha, int *coluna) {
   if (modo == EMPILHAR) {
     *linha = jogador->linha - 1;
     *coluna = jogador->coluna;
@@ -287,35 +291,74 @@ void atualizarJogo(EstadoJogo *jogo, int tecla, int *contadorMovimentoPeixe,
   }
 }
 
+static int obterPontuacaoFinal(const Jogador *jogador, ModoJogo modo) {
+  if (modo == MAIS_PEIXES) {
+    return jogador->peixes;
+  }
+
+  if (modo == MAIS_PESO) {
+    return jogador->peso;
+  }
+
+  if (modo == EMPILHAR) {
+    return jogador->empilhados;
+  }
+
+  return 0;
+}
+
+static const char *nomePontuacao(ModoJogo modo, int valor) {
+  if (modo == MAIS_PEIXES) {
+    if (valor == 1) {
+      return "peixe";
+    }
+
+    return "peixes";
+  }
+
+  if (modo == MAIS_PESO) {
+    return "peso";
+  }
+
+  if (modo == EMPILHAR) {
+    if (valor == 1) {
+      return "empilhado";
+    }
+
+    return "empilhados";
+  }
+
+  if (valor == 1) {
+    return "ponto";
+  }
+
+  return "pontos";
+}
+
 void mostrarResultado(const EstadoJogo *jogo) {
+  int pontosP1 = obterPontuacaoFinal(&jogo->p1, jogo->modo);
+  int pontosP2 = obterPontuacaoFinal(&jogo->p2, jogo->modo);
+  const char *tipoPontuacaoP1 = nomePontuacao(jogo->modo, pontosP1);
+  const char *tipoPontuacaoP2 = nomePontuacao(jogo->modo, pontosP2);
+
   printf("\n==============================\n");
   printf("          FIM DO JOGO\n");
-  printf("==============================\n");
+  printf("==============================\n\n");
 
-  if (jogo->modo == MAIS_PEIXES) {
-    printf("Resultado por peixes:\n");
-    printf("P1: %d peixes\n", jogo->p1.peixes);
+  printf("Modo: %s\n\n", nomeModo(jogo->modo));
 
-    if (jogo->jogadores == 2) {
-      printf("P2: %d peixes\n", jogo->p2.peixes);
-    }
-  }
+  printf("Pontuacao final:\n");
+  printf(COR_VERMELHO "PR" COR_RESET ": %d %s\n", pontosP1, tipoPontuacaoP1);
 
-  if (jogo->modo == MAIS_PESO) {
-    printf("Resultado por peso:\n");
-    printf("P1: %d peso\n", jogo->p1.peso);
+  if (jogo->jogadores == 2) {
+    printf(COR_AMARELO "PY" COR_RESET ": %d %s\n", pontosP2, tipoPontuacaoP2);
 
-    if (jogo->jogadores == 2) {
-      printf("P2: %d peso\n", jogo->p2.peso);
-    }
-  }
-
-  if (jogo->modo == EMPILHAR) {
-    printf("Resultado por peixes empilhados:\n");
-    printf("P1: %d empilhados\n", jogo->p1.empilhados);
-
-    if (jogo->jogadores == 2) {
-      printf("P2: %d empilhados\n", jogo->p2.empilhados);
+    if (pontosP1 > pontosP2) {
+      printf("\nVencedor: " COR_VERMELHO "PR" COR_RESET "\n");
+    } else if (pontosP2 > pontosP1) {
+      printf("\nVencedor: " COR_AMARELO "PY" COR_RESET "\n");
+    } else {
+      printf("\nResultado: empate\n");
     }
   }
 }

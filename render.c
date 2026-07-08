@@ -1,10 +1,20 @@
+#include "render.h"
 #include "game.h"
 #include "logic.h"
-#include "render.h"
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
+#include <stdio.h>
+#include <string.h>
 
-#define TABULEIRO_LINHA 10
-#define TABULEIRO_COLUNA 2
+#define TABULEIRO_LINHA 6
+#define TABULEIRO_COLUNA 27
+
+#define PAINEL_ESQUERDO_LINHA 3
+#define PAINEL_ESQUERDO_COLUNA 0
+#define PAINEL_ESQUERDO_LARGURA 24
+
+#define PAINEL_DIREITO_LINHA 3
+#define PAINEL_DIREITO_COLUNA 72
+#define PAINEL_DIREITO_LARGURA 30
 
 enum {
   COR_JOGADOR_1 = 1,
@@ -27,6 +37,8 @@ void inicializarInterface(void) {
   keypad(stdscr, TRUE);
   nodelay(stdscr, TRUE);
   curs_set(0);
+  clear();
+  refresh();
 
   if (!has_colors()) {
     coresAtivas = 0;
@@ -62,6 +74,51 @@ static void desenharTextoComCor(int linha, int coluna, const char *texto,
 
   if (coresAtivas) {
     attroff(COLOR_PAIR(cor) | A_BOLD);
+  }
+}
+
+static void desenharTitulo(int linha, int coluna, const char *texto) {
+  if (coresAtivas) {
+    attron(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+
+  mvprintw(linha, coluna, "%s", texto);
+
+  if (coresAtivas) {
+    attroff(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+}
+
+static void desenharCaixa(int linha, int coluna, int altura, int largura,
+                          const char *titulo) {
+  int fimLinha = linha + altura - 1;
+  int fimColuna = coluna + largura - 1;
+
+  if (coresAtivas) {
+    attron(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+
+  mvaddch(linha, coluna, '+');
+  mvaddch(linha, fimColuna, '+');
+  mvaddch(fimLinha, coluna, '+');
+  mvaddch(fimLinha, fimColuna, '+');
+
+  for (int x = coluna + 1; x < fimColuna; x++) {
+    mvaddch(linha, x, '-');
+    mvaddch(fimLinha, x, '-');
+  }
+
+  for (int y = linha + 1; y < fimLinha; y++) {
+    mvaddch(y, coluna, '|');
+    mvaddch(y, fimColuna, '|');
+  }
+
+  if (coresAtivas) {
+    attroff(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+
+  if (titulo != NULL && titulo[0] != '\0') {
+    mvprintw(linha, coluna + 2, " %s ", titulo);
   }
 }
 
@@ -114,8 +171,7 @@ static void desenharBordaTabuleiro(void) {
     mvaddch(fundo, coluna, '-');
   }
 
-  for (int linha = TABULEIRO_LINHA; linha < TABULEIRO_LINHA + LINHAS;
-       linha++) {
+  for (int linha = TABULEIRO_LINHA; linha < TABULEIRO_LINHA + LINHAS; linha++) {
     mvaddch(linha, esquerda, '|');
     mvaddch(linha, direita, '|');
   }
@@ -144,67 +200,254 @@ static void colocarNoTabuleiro(char tabuleiro[LINHAS][COLUNAS], int linha,
   }
 }
 
-static void desenharControlosModo(const EstadoJogo *jogo) {
-  if (jogo->jogadores == 2) {
-    mvprintw(3, 0, "Controlos: PR = WASD | PY = setas | Q = sair");
+static int pontuacaoJogador(const Jogador *jogador, ModoJogo modo) {
+  if (modo == MAIS_PEIXES) {
+    return jogador->peixes;
+  }
+
+  if (modo == MAIS_PESO) {
+    return jogador->peso;
+  }
+
+  if (modo == EMPILHAR) {
+    return jogador->empilhados;
+  }
+
+  return 0;
+}
+
+static const char *textoPontuacao(ModoJogo modo, int valor) {
+  if (modo == MAIS_PEIXES) {
+    if (valor == 1) {
+      return "peixe";
+    }
+
+    return "peixes";
+  }
+
+  if (modo == MAIS_PESO) {
+    return "peso";
+  }
+
+  if (modo == EMPILHAR) {
+    if (valor == 1) {
+      return "empilhado";
+    }
+
+    return "empilhados";
+  }
+
+  if (valor == 1) {
+    return "ponto";
+  }
+
+  return "pontos";
+}
+
+static const char *objetivoCurto(ModoJogo modo) {
+  if (modo == MAIS_PEIXES) {
+    return "Maior numero";
+  }
+
+  if (modo == MAIS_PESO) {
+    return "Maior peso";
+  }
+
+  if (modo == EMPILHAR) {
+    return "Maior pilha";
+  }
+
+  return "Pontuar";
+}
+
+static int contarDigitos(int valor) {
+  int digitos = 1;
+
+  if (valor < 0) {
+    valor = -valor;
+    digitos++;
+  }
+
+  while (valor >= 10) {
+    valor /= 10;
+    digitos++;
+  }
+
+  return digitos;
+}
+
+static int larguraPontuacaoJogador(const Jogador *jogador, ModoJogo modo) {
+  int pontos = pontuacaoJogador(jogador, modo);
+
+  return 2 + 1 + contarDigitos(pontos) + 1 +
+         (int)strlen(textoPontuacao(modo, pontos));
+}
+
+static void desenharTempo(const EstadoJogo *jogo) {
+  char texto[30];
+  int linha = TABULEIRO_LINHA - 1;
+  int esquerdaTabuleiro = TABULEIRO_COLUNA - 1;
+  int larguraTabuleiro = COLUNAS + 2;
+  int coluna;
+
+  if (jogo->tempo == 9999) {
+    snprintf(texto, sizeof(texto), "[PRATICA]");
   } else {
-    mvprintw(3, 0, "Controlos: PR = WASD | Q = sair");
+    snprintf(texto, sizeof(texto), "[TEMPO: %2d s]", jogo->tempo);
+  }
+
+  coluna = esquerdaTabuleiro + (larguraTabuleiro - (int)strlen(texto)) / 2;
+
+  if (jogo->tempo == 9999) {
+    if (coresAtivas) {
+      attron(COLOR_PAIR(COR_BORDA) | A_BOLD);
+    }
+
+    mvprintw(linha, coluna, "%s", texto);
+
+    if (coresAtivas) {
+      attroff(COLOR_PAIR(COR_BORDA) | A_BOLD);
+    }
+
+    return;
+  }
+
+  if (jogo->tempo <= 10) {
+    if (coresAtivas) {
+      attron(COLOR_PAIR(COR_PEIXE_VERMELHO) | A_BOLD);
+    }
+
+    mvprintw(linha, coluna, "%s", texto);
+
+    if (coresAtivas) {
+      attroff(COLOR_PAIR(COR_PEIXE_VERMELHO) | A_BOLD);
+    }
+
+    return;
+  }
+
+  if (coresAtivas) {
+    attron(COLOR_PAIR(COR_PEIXE_AMARELO) | A_BOLD);
+  }
+
+  mvprintw(linha, coluna, "%s", texto);
+
+  if (coresAtivas) {
+    attroff(COLOR_PAIR(COR_PEIXE_AMARELO) | A_BOLD);
   }
 }
 
-static void desenharLegendaModo(const EstadoJogo *jogo) {
-  if (jogo->modo == MAIS_PEIXES) {
-    mvprintw(5, 0, "Objetivo: apanhar o maior numero de peixes.");
-    mvprintw(8, 0, "R/Y = peixes especiais | F = peixe normal | H/h = anzol");
-    return;
+static void desenharPontuacaoTopo(const EstadoJogo *jogo) {
+  int linha = TABULEIRO_LINHA - 2;
+  int esquerdaTabuleiro = TABULEIRO_COLUNA - 1;
+  int larguraTabuleiro = COLUNAS + 2;
+  int larguraTotal;
+  int coluna;
+  int pontosP1 = pontuacaoJogador(&jogo->p1, jogo->modo);
+  const char *tipoP1 = textoPontuacao(jogo->modo, pontosP1);
+
+  larguraTotal = larguraPontuacaoJogador(&jogo->p1, jogo->modo);
+
+  if (jogo->jogadores == 2) {
+    larguraTotal += 3 + larguraPontuacaoJogador(&jogo->p2, jogo->modo);
   }
 
-  if (jogo->modo == MAIS_PESO) {
-    mvprintw(5, 0, "Objetivo: apanhar peixes com maior peso total.");
-    mvprintw(8, 0, "R/Y = peixes especiais | F = peixe normal | H/h = anzol");
-    return;
+  coluna = esquerdaTabuleiro + (larguraTabuleiro - larguraTotal) / 2;
+
+  if (coluna < esquerdaTabuleiro) {
+    coluna = esquerdaTabuleiro;
   }
 
-  if (jogo->modo == EMPILHAR) {
-    mvprintw(5, 0, "Objetivo: empilhar o maior numero de peixes.");
-    mvprintw(8, 0, "R/Y = peixes especiais | F = peixe normal | B/b = cesto");
+  desenharTextoComCor(linha, coluna, "PR", COR_JOGADOR_1);
+  coluna += 2;
+
+  mvprintw(linha, coluna, " %d %s", pontosP1, tipoP1);
+  coluna += 1 + contarDigitos(pontosP1) + 1 + (int)strlen(tipoP1);
+
+  if (jogo->jogadores == 2) {
+    int pontosP2 = pontuacaoJogador(&jogo->p2, jogo->modo);
+    const char *tipoP2 = textoPontuacao(jogo->modo, pontosP2);
+
+    mvprintw(linha, coluna, " | ");
+    coluna += 3;
+
+    desenharTextoComCor(linha, coluna, "PY", COR_JOGADOR_2);
+    coluna += 2;
+
+    mvprintw(linha, coluna, " %d %s", pontosP2, tipoP2);
   }
 }
 
-static void desenharPontuacaoModo(const EstadoJogo *jogo) {
+static void desenharCabecalho(const EstadoJogo *jogo) {
+  desenharTitulo(0, 0, "PENGUIN FISHING GAME");
+  mvprintw(1, 0, "Modo: %s", nomeModo(jogo->modo));
+}
+
+static void desenharPainelObjetivo(const EstadoJogo *jogo) {
+  desenharCaixa(PAINEL_ESQUERDO_LINHA, PAINEL_ESQUERDO_COLUNA, 7,
+                PAINEL_ESQUERDO_LARGURA, "OBJETIVO");
+
+  mvprintw(PAINEL_ESQUERDO_LINHA + 2, PAINEL_ESQUERDO_COLUNA + 2, "%s",
+           objetivoCurto(jogo->modo));
+
   if (jogo->modo == MAIS_PEIXES) {
-    desenharTextoComCor(6, 0, "PR", COR_JOGADOR_1);
-    mvprintw(6, 3, "peixes=%d", jogo->p1.peixes);
-
-    if (jogo->jogadores == 2) {
-      desenharTextoComCor(7, 0, "PY", COR_JOGADOR_2);
-      mvprintw(7, 3, "peixes=%d", jogo->p2.peixes);
-    }
-
-    return;
+    mvprintw(PAINEL_ESQUERDO_LINHA + 3, PAINEL_ESQUERDO_COLUNA + 2,
+             "apanhar peixes");
+  } else if (jogo->modo == MAIS_PESO) {
+    mvprintw(PAINEL_ESQUERDO_LINHA + 3, PAINEL_ESQUERDO_COLUNA + 2,
+             "peso total");
+  } else {
+    mvprintw(PAINEL_ESQUERDO_LINHA + 3, PAINEL_ESQUERDO_COLUNA + 2,
+             "empilhar peixes");
   }
+}
 
-  if (jogo->modo == MAIS_PESO) {
-    desenharTextoComCor(6, 0, "PR", COR_JOGADOR_1);
-    mvprintw(6, 3, "peso=%d", jogo->p1.peso);
+static void desenharPainelDireito(const EstadoJogo *jogo) {
+  desenharCaixa(PAINEL_DIREITO_LINHA, PAINEL_DIREITO_COLUNA, 18,
+                PAINEL_DIREITO_LARGURA, "INFO");
 
-    if (jogo->jogadores == 2) {
-      desenharTextoComCor(7, 0, "PY", COR_JOGADOR_2);
-      mvprintw(7, 3, "peso=%d", jogo->p2.peso);
-    }
+  desenharTitulo(PAINEL_DIREITO_LINHA + 2, PAINEL_DIREITO_COLUNA + 2,
+                 "LEGENDA");
 
-    return;
-  }
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 4, PAINEL_DIREITO_COLUNA + 2, "R",
+                      COR_PEIXE_VERMELHO);
+  mvprintw(PAINEL_DIREITO_LINHA + 4, PAINEL_DIREITO_COLUNA + 6,
+           "peixe vermelho");
+
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 5, PAINEL_DIREITO_COLUNA + 2, "Y",
+                      COR_PEIXE_AMARELO);
+  mvprintw(PAINEL_DIREITO_LINHA + 5, PAINEL_DIREITO_COLUNA + 6,
+           "peixe amarelo");
+
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 6, PAINEL_DIREITO_COLUNA + 2, "F",
+                      COR_PEIXE_NORMAL);
+  mvprintw(PAINEL_DIREITO_LINHA + 6, PAINEL_DIREITO_COLUNA + 6, "peixe neutro");
 
   if (jogo->modo == EMPILHAR) {
-    desenharTextoComCor(6, 0, "PR", COR_JOGADOR_1);
-    mvprintw(6, 3, "empilhados=%d", jogo->p1.empilhados);
-
-    if (jogo->jogadores == 2) {
-      desenharTextoComCor(7, 0, "PY", COR_JOGADOR_2);
-      mvprintw(7, 3, "empilhados=%d", jogo->p2.empilhados);
-    }
+    mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "B/b  cesto");
+  } else {
+    mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "H/h  anzol");
   }
+
+  desenharTitulo(PAINEL_DIREITO_LINHA + 11, PAINEL_DIREITO_COLUNA + 2,
+                 "CONTROLOS");
+
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 2,
+                      "PR", COR_JOGADOR_1);
+  mvprintw(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 6, "WASD");
+
+  if (jogo->jogadores == 2) {
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 2,
+                        "PY", COR_JOGADOR_2);
+    mvprintw(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 6, "setas");
+  }
+
+  mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2, "Q    sair");
+}
+
+static void desenharRodape(void) {
+  mvprintw(TABULEIRO_LINHA + LINHAS + 2, TABULEIRO_COLUNA - 1,
+           "Q para sair | ultimos 10 segundos em vermelho");
 }
 
 void desenharJogo(const EstadoJogo *jogo) {
@@ -239,20 +482,13 @@ void desenharJogo(const EstadoJogo *jogo) {
 
   erase();
 
-  mvprintw(0, 0, "Penguin Fishing Game");
-  mvprintw(1, 0, "Modo: %s", nomeModo(jogo->modo));
+  desenharCabecalho(jogo);
+  desenharPainelObjetivo(jogo);
+  desenharPainelDireito(jogo);
 
-  if (jogo->tempo == 9999) {
-    mvprintw(2, 0, "Tempo: pratica infinita");
-  } else {
-    mvprintw(2, 0, "Tempo: %d", jogo->tempo);
-  }
-
-  desenharControlosModo(jogo);
-  desenharLegendaModo(jogo);
-  desenharPontuacaoModo(jogo);
-
+  desenharPontuacaoTopo(jogo);
   desenharBordaTabuleiro();
+  desenharTempo(jogo);
 
   for (int i = 0; i < LINHAS; i++) {
     for (int j = 0; j < COLUNAS; j++) {
@@ -269,6 +505,8 @@ void desenharJogo(const EstadoJogo *jogo) {
                         TABULEIRO_COLUNA + jogo->p2.coluna, "PY",
                         COR_JOGADOR_2);
   }
+
+  desenharRodape();
 
   refresh();
 }

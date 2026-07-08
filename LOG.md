@@ -24,10 +24,9 @@ Resolvi instalando os pacotes necessários no MSYS2 e ajustando o comando de com
 
 **Próximo passo planeado:**
 
-Melhorar a resposta do movimento das teclas e reduzir o tremor do ecrã durante o jogo. Para isso, pretendo testar o uso de `erase()`, `refresh()` e `flushinp()` dentro do ciclo principal do jogo.
+Melhorar a resposta do movimento das teclas e reduzir o tremor do ecrã durante o jogo.
 
 **Linhas de código escritas (estimativa):**
-<<<<<<< HEAD
 
 350
 
@@ -54,7 +53,7 @@ Melhorar a resposta do movimento das teclas e reduzir o tremor do ecrã durante 
 
 **Maior dificuldade:**
 
-A maior dificuldade foi melhorar o ciclo principal do jogo sem prejudicar a leitura das teclas. O jogo precisava de ficar mais fluido, mas sem deixar de responder aos comandos do jogador.
+A maior dificuldade foi melhorar o ciclo principal do jogo sem prejudicar a leitura das teclas.
 
 **Como resolvi:**
 
@@ -62,9 +61,9 @@ Melhorei o ciclo de desenho e atualização do jogo, usando uma estrutura mais e
 
 **Próximo passo planeado:**
 
-Melhorar a validação dos inputs usando `strtol()` em vez de `atoi()`, para tratar melhor entradas inválidas como letras, símbolos, comandos incompletos ou ENTER vazio.
+Melhorar a validação dos inputs usando `strtol()` em vez de `atoi()`.
 
-**Linhas de código escritas (estimativa):**
+**Linhas de código escritas ou alteradas (estimativa):**
 
 250
 
@@ -93,78 +92,17 @@ A maior dificuldade foi adaptar o desenho dos jogadores para dois caracteres, `P
 
 Mantive o tabuleiro como uma matriz simples de caracteres e desenhei os jogadores por cima da matriz com `mvprintw()`. Assim foi possível mostrar `PR` e `PY` com cores próprias, sem complicar demasiado a estrutura principal do jogo.
 
-Também foi criada uma função de validação com `strtol()` para confirmar se a opção escrita pelo utilizador é realmente um número válido antes de ser usada no menu.
-
 **Próximo passo planeado:**
 
-Melhorar ainda mais a UX visual para tornar mais claro quais peixes pertencem a cada jogador. Depois disso, preparar a funcionalidade de guardar e retomar jogo, tendo em atenção que a tecla `S` já é usada para mover o jogador 1 para baixo.
+Melhorar ainda mais a UX visual para tornar mais claro quais peixes pertencem a cada jogador.
 
-**Linhas de código escritas (estimativa):**
+**Linhas de código escritas ou alteradas (estimativa):**
 
 200
-=======
-350
 
-## Sessão 2 - 20/05/2026
+---
 
-**Funcionalidades implementadas:**
-- Melhoria da fluidez do jogo no terminal.
-- Substituição de `clear()` por `erase()` para reduzir o tremor do ecrã.
-- Alteração do ciclo principal do jogo para desenhar o tabuleiro depois das atualizações.
-- Remoção do `refresh()` de dentro da função `desenharJogo()`.
-- Colocação do `refresh()` no fim do ciclo principal.
-- Redução do tempo de pausa com `napms(35)` para melhorar a resposta do movimento.
-- Correção do problema em que o jogador deixava de se mover após alterações no ciclo do jogo.
-- Correção da leitura do menu para evitar que carregar apenas em ENTER fosse interpretado como opção 0.
-- Melhoria visual do tabuleiro, com bordas e representação da água.
-- Ajuste da pontuação apresentada no ecrã, mostrando apenas a pontuação relevante para cada modo de jogo.
-- Ajuste da legenda, mostrando apenas os elementos importantes para o modo escolhido.
-- Criação de um resultado final com indicação do vencedor nos modos de dois jogadores.
-- Adição da escolha de idioma no início do programa.
-- Implementação de suporte para inglês e português europeu nos menus, objetivos, legendas, pontuação e resultados.
-- Adição da opção 10 no menu principal para mudar o idioma.
-- Adição da opção 0 no menu de escolha de idioma para sair do jogo.
-- Ajuste automático das linhas dos títulos para ficarem proporcionais ao texto apresentado.
-- Implementação da indicação de jogo interrompido pelo jogador quando é usada a tecla `Q`.
-- Ajuste para mostrar a pontuação final mesmo quando o jogo é interrompido pelo jogador.
-
-**Maior dificuldade:**
-A maior dificuldade foi reorganizar o ciclo principal do jogo sem quebrar o movimento dos jogadores. Também houve alguns erros com chavetas no código, que fizeram partes da função `cicloJogo()` ficarem fora da função. Além disso, foi necessário corrigir problemas de compilação causados pelo executável antigo ainda estar aberto.
-
-**Como resolvi:**
-Resolvi reorganizando o ciclo do jogo para seguir uma ordem mais clara: ler a tecla, atualizar o estado do jogo, mover o peixe, verificar capturas, atualizar o tempo, desenhar o ecrã e só depois fazer `refresh()`. Também corrigi as chavetas da função `cicloJogo()` e passei a apagar o executável antigo antes de compilar quando necessário. Para o menu, melhorei a validação da opção escolhida e adicionei suporte ao idioma selecionado.
-
-**Próximo passo planeado:**
-O próximo passo será adicionar a opção de guardar o jogo durante a partida, usando uma tecla apropriada e evitando conflito com os controlos atuais. Também pretendo criar uma opção no menu principal para retomar um jogo guardado.
-
-Além disso, pretendo melhorar a validação das entradas do utilizador. Em C não existe `try`/`catch` como em outras linguagens, por isso a validação será feita através da verificação do input. A ideia é substituir o uso de `atoi()` por uma solução mais segura, como `strtol()`, para evitar que comandos mal digitados, como letras ou símbolos, sejam interpretados como uma opção válida.
-**Linhas de código escritas ou alteradas (estimativa):**
-180
->>>>>>> 0a2d2b21c1cbd284349dd59a68490cad2379f9c9
-## Sessão 4 - 08/07/2026
-
-**Funcionalidades implementadas:**
-
-- Melhoria da legenda visual durante o jogo.
-- Identificação mais clara dos jogadores `PR` e `PY`.
-- Identificação visual dos peixes `R`, `Y` e `F`.
-- Adição de bordas ao tabuleiro.
-- Ajuste da posição do tabuleiro para acomodar melhor a legenda.
-- Manutenção das cores dos jogadores e dos peixes com ncurses.
-
-**Maior dificuldade:**
-
-A maior dificuldade foi ajustar as posições do tabuleiro depois de adicionar mais informação visual no ecrã.
-
-**Como resolvi:**
-
-Criei constantes para a posição inicial do tabuleiro e passei a desenhar o tabuleiro com base nessas coordenadas. Também adicionei uma função própria para desenhar a borda, mantendo o código mais organizado.
-
-**Próximo passo planeado:**
-
-Melhorar o resultado final, mostrando de forma mais clara o vencedor nos modos de dois jogadores.
-
-## Sessão 4
+## Sessão 4 – 08/07/2026
 
 **Funcionalidades implementadas:**
 
@@ -172,8 +110,11 @@ Melhorar o resultado final, mostrando de forma mais clara o vencedor nos modos d
 - Separação do menu, lógica do jogo e desenho visual.
 - Redução do tamanho e complexidade do ficheiro `game.c`.
 - Manutenção da validação com `strtol()`.
-- Manutenção das cores dos jogadores e peixes.
+- Manutenção das cores dos jogadores e dos peixes.
 - Pontuação apresentada conforme o modo escolhido.
+- Melhoria da legenda visual durante o jogo.
+- Identificação visual dos peixes `R`, `Y` e `F`.
+- Adição de bordas ao tabuleiro.
 
 **Maior dificuldade:**
 
@@ -181,8 +122,71 @@ A maior dificuldade foi separar o código sem alterar o comportamento do jogo.
 
 **Como resolvi:**
 
-Dividi o projeto em ficheiros com responsabilidades diferentes: menu, lógica, renderização e ciclo principal.
+Dividi o projeto em ficheiros com responsabilidades diferentes: `menu.c`, `logic.c`, `render.c` e `game.c`. Assim, o código ficou mais organizado e mais fácil de manter.
 
 **Próximo passo planeado:**
 
 Melhorar o resultado final, mostrando o vencedor de forma mais clara nos modos de dois jogadores.
+
+---
+
+## Sessão 5 – 08/07/2026
+
+**Funcionalidades implementadas:**
+
+- Adição da escolha inicial de idioma antes do menu principal.
+- Menu principal apresentado de acordo com o idioma escolhido.
+- Adição da opção `11 - Como jogar / How to play`.
+- Explicação dos modos de jogo, regras, tipos de peixe e controlos.
+- Possibilidade de mudar o idioma através da opção `10`.
+- Correção da organização das funções relacionadas com o menu.
+- Adição de timer visível durante o jogo.
+- Apresentação do tempo restante em segundos.
+- Indicação especial para os modos de prática sem limite de tempo.
+- Destaque visual nos últimos 10 segundos da partida.
+- Melhoria do resultado final com pontuação do modo escolhido.
+- Adição da pergunta para jogar novamente após o fim da partida.
+- Adição de confirmação antes de sair do jogo.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi adaptar o menu para trabalhar com dois idiomas sem criar conflito com funções já existentes, como `nomeModo()`.
+
+**Como resolvi:**
+
+Separei melhor as responsabilidades entre os ficheiros e mantive a função `nomeModo()` com a assinatura original. A escolha de idioma ficou ligada ao menu e às mensagens principais do utilizador.
+
+**Próximo passo planeado:**
+
+Melhorar a organização visual do ecrã do jogo durante a partida.
+
+---
+
+## Sessão 6 – 08/07/2026
+
+**Funcionalidades implementadas:**
+
+- Reorganização visual da interface durante o jogo.
+- Criação de uma estrutura de ecrã com cabeçalho, objetivo, tabuleiro, informação lateral e rodapé.
+- Agrupamento da legenda e dos controlos num painel lateral.
+- Colocação do objetivo do modo num painel próprio.
+- Integração do timer na borda superior do tabuleiro.
+- Centralização do timer em relação ao tabuleiro.
+- Colocação da pontuação por cima do timer, também centrada com o tabuleiro.
+- Remoção da pontuação duplicada do painel lateral.
+- Correção da pontuação no topo para suportar `PR` e `PY`.
+- Correção do texto da pontuação para singular e plural, como `1 peixe` e `2 peixes`.
+- Correção do resultado final para mostrar singular e plural corretamente.
+- Manutenção das cores dos jogadores no resultado final e no menu de jogar novamente.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi reorganizar a interface sem quebrar a lógica do jogo e sem repetir informação no ecrã.
+
+**Como resolvi:**
+
+Mantive a lógica da pontuação em `logic.c` e concentrei a apresentação visual em `render.c`. Também criei funções auxiliares para calcular a pontuação visível, escolher o texto correto no singular ou plural e centralizar a pontuação e o timer em relação ao tabuleiro.
+
+**Próximo passo planeado:**
+
+Testar todos os modos de jogo e considerar a criação de níveis de dificuldade ou uma opção de pausa antes de implementar guardar e retomar jogo.

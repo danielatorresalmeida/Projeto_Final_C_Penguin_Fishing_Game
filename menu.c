@@ -17,6 +17,11 @@ static void limparRestoLinha(void) {
   }
 }
 
+static void limparEcraTexto(void) {
+  // Limpa o terminal para a ajuda ficar mais legivel.
+  printf("\033[2J\033[H");
+}
+
 int lerOpcao(void) {
   char linha[64];
   char *fim;
@@ -118,105 +123,129 @@ void mostrarMenu(Idioma idioma) {
 }
 
 void mostrarComoJogar(Idioma idioma) {
+  limparEcraTexto();
+
   if (idioma == IDIOMA_EN) {
     printf("\n");
     printf("==============================\n");
     printf("          HOW TO PLAY\n");
+    printf("        PAGE 1 OF 2\n");
+    printf("==============================\n\n");
+
+    printf("GOAL\n");
+    printf("- Catch fish on the board.\n");
+    printf("- The winner depends on the selected mode.\n\n");
+
+    printf("GAME MODES\n");
+    printf("- Most fish   : player with more fish wins.\n");
+    printf("- Most weight : player with more total weight wins.\n");
+    printf("- Stack fish  : player with the biggest stack wins.\n\n");
+
+    printf("FISH TYPES\n");
+    printf("- F : neutral fish.\n");
+    printf("- R : gives bonus to PR.\n");
+    printf("- Y : gives bonus to PY.\n\n");
+
+    printf("CONTROLS\n");
+    printf("- PR : W A S D\n");
+    printf("- PY : arrow keys\n");
+    printf("- P  : pause / continue\n");
+    printf("- Q  : quit and show result\n\n");
+
+    printf("Press Enter to see scoring rules...");
+    limparRestoLinha();
+
+    limparEcraTexto();
+    printf("\n");
     printf("==============================\n");
-    printf("\n");
-    printf("Goal:\n");
-    printf("- Control your penguin and catch fish on the board.\n");
-    printf("- The winner depends on the selected game mode.\n");
-    printf("\n");
-    printf("Game modes:\n");
-    printf("- Most fish: win by catching the highest number of fish.\n");
-    printf("- Most weight: win by collecting the highest total weight.\n");
-    printf("- Stack fish: win by building the highest fish stack.\n");
-    printf("\n");
-    printf("Fish types:\n");
-    printf("- R: red fish. Gives bonus to PR when PR catches it.\n");
-    printf("- Y: yellow fish. Gives bonus to PY when PY catches it.\n");
-    printf("- F: neutral fish. No color bonus.\n");
-    printf("\n");
-    printf("Scoring by mode:\n");
-    printf("- Most fish:\n");
-    printf("  F gives +1 fish to the player who catches it.\n");
-    printf("  R gives +2 if PR catches it, or +1 if PY catches it.\n");
-    printf("  Y gives +2 if PY catches it, or +1 if PR catches it.\n");
-    printf("\n");
-    printf("- Most weight:\n");
-    printf("  Each fish adds its weight to the player who catches it.\n");
-    printf("  A fish with the player's color adds a +2 bonus.\n");
-    printf("  Example: PR catches R with weight 3 = 5 points.\n");
-    printf("  Example: PR catches Y with weight 3 = 3 points.\n");
-    printf("\n");
-    printf("- Stack fish:\n");
-    printf("  Every caught fish increases the catcher player's stack.\n");
-    printf("  A fish with the player's color gives +2 to the stack.\n");
-    printf("  Neutral or opponent-colored fish gives +1 to the stack.\n");
-    printf("\n");
-    printf("Two-player mode:\n");
-    printf("- The player who catches the fish always receives the score.\n");
-    printf("- The fish color only decides whether there is a bonus.\n");
-    printf("- Players cannot occupy or cross the same position.\n");
-    printf("- A player can block the other by standing on the neighbouring pixel.\n");
-    printf("\n");
-    printf("Controls:\n");
-    printf("- PR: use W, A, S, D.\n");
-    printf("- PY: use arrow keys.\n");
-    printf("- P: pause or continue the game.\n");
-    printf("- Q: stop the game and show the final result.\n");
-    printf("\n");
+    printf("          HOW TO PLAY\n");
+    printf("        PAGE 2 OF 2\n");
+    printf("==============================\n\n");
+
+    printf("SCORING\n\n");
+
+    printf("Most fish\n");
+    printf("- F = +1 fish.\n");
+    printf("- R = +2 for PR, +1 for PY.\n");
+    printf("- Y = +2 for PY, +1 for PR.\n\n");
+
+    printf("Most weight\n");
+    printf("- Each fish adds its weight.\n");
+    printf("- Player-colored fish = +2 bonus.\n");
+    printf("- Example: PR catches R with weight 3 = 5.\n");
+    printf("- Example: PR catches Y with weight 3 = 3.\n\n");
+
+    printf("Stack fish\n");
+    printf("- Player-colored fish = +2.\n");
+    printf("- Neutral or opponent fish = +1.\n\n");
+
+    printf("2-PLAYER MODE\n");
+    printf("- The player who catches the fish gets the score.\n");
+    printf("- Fish color only decides the bonus.\n");
+    printf("- Players cannot occupy the same position.\n");
+    printf("- A player can block the other.\n\n");
+
     printf("Press Enter to return to the menu...");
   } else {
     printf("\n");
     printf("==============================\n");
     printf("          COMO JOGAR\n");
+    printf("        PAGINA 1 DE 2\n");
+    printf("==============================\n\n");
+
+    printf("OBJETIVO\n");
+    printf("- Apanhar peixes no tabuleiro.\n");
+    printf("- O vencedor depende do modo escolhido.\n\n");
+
+    printf("MODOS DE JOGO\n");
+    printf("- Mais peixes  : ganha quem tiver mais peixes.\n");
+    printf("- Mais peso    : ganha quem tiver mais peso.\n");
+    printf("- Empilhar     : ganha quem tiver a maior pilha.\n\n");
+
+    printf("TIPOS DE PEIXE\n");
+    printf("- F : peixe neutro.\n");
+    printf("- R : da bonus ao PR.\n");
+    printf("- Y : da bonus ao PY.\n\n");
+
+    printf("CONTROLOS\n");
+    printf("- PR : W A S D\n");
+    printf("- PY : setas do teclado\n");
+    printf("- P  : pausa / continua\n");
+    printf("- Q  : sair e mostrar resultado\n\n");
+
+    printf("Pressiona Enter para ver a pontuacao...");
+    limparRestoLinha();
+
+    limparEcraTexto();
+    printf("\n");
     printf("==============================\n");
-    printf("\n");
-    printf("Objetivo:\n");
-    printf("- Controlar o pinguim e apanhar peixes no tabuleiro.\n");
-    printf("- O vencedor depende do modo de jogo escolhido.\n");
-    printf("\n");
-    printf("Modos de jogo:\n");
-    printf("- Mais peixes: ganha quem apanhar mais peixes.\n");
-    printf("- Mais peso: ganha quem acumular maior peso total.\n");
-    printf("- Empilhar peixes: ganha quem tiver a maior pilha.\n");
-    printf("\n");
-    printf("Tipos de peixe:\n");
-    printf("- R: peixe vermelho. Da bonus ao PR quando o PR o apanha.\n");
-    printf("- Y: peixe amarelo. Da bonus ao PY quando o PY o apanha.\n");
-    printf("- F: peixe neutro. Nao da bonus de cor.\n");
-    printf("\n");
-    printf("Pontuacao por modo:\n");
-    printf("- Mais peixes:\n");
-    printf("  F vale +1 peixe para quem o apanha.\n");
-    printf("  R vale +2 se o PR apanhar, ou +1 se o PY apanhar.\n");
-    printf("  Y vale +2 se o PY apanhar, ou +1 se o PR apanhar.\n");
-    printf("\n");
-    printf("- Mais peso:\n");
-    printf("  Cada peixe adiciona o seu peso a quem o apanha.\n");
-    printf("  Peixe da cor do jogador adiciona +2 de bonus.\n");
-    printf("  Exemplo: PR apanha R de peso 3 = 5 pontos.\n");
-    printf("  Exemplo: PR apanha Y de peso 3 = 3 pontos.\n");
-    printf("\n");
-    printf("- Empilhar peixes:\n");
-    printf("  Cada peixe apanhado aumenta a pilha de quem o apanha.\n");
-    printf("  Peixe da cor do jogador vale +2 na pilha.\n");
-    printf("  Peixe neutro ou adversario vale +1 na pilha.\n");
-    printf("\n");
-    printf("Modo de dois jogadores:\n");
-    printf("- Quem apanha o peixe recebe sempre a pontuacao.\n");
-    printf("- A cor do peixe apenas decide se existe bonus.\n");
-    printf("- Os jogadores nao podem ocupar nem atravessar a mesma posicao.\n");
-    printf("- Um jogador pode bloquear o outro ficando no pixel vizinho.\n");
-    printf("\n");
-    printf("Controlos:\n");
-    printf("- PR: usa W, A, S, D.\n");
-    printf("- PY: usa as setas do teclado.\n");
-    printf("- P: pausa ou continua o jogo.\n");
-    printf("- Q: interrompe o jogo e mostra o resultado final.\n");
-    printf("\n");
+    printf("          COMO JOGAR\n");
+    printf("        PAGINA 2 DE 2\n");
+    printf("==============================\n\n");
+
+    printf("PONTUACAO\n\n");
+
+    printf("Mais peixes\n");
+    printf("- F = +1 peixe.\n");
+    printf("- R = +2 para PR, +1 para PY.\n");
+    printf("- Y = +2 para PY, +1 para PR.\n\n");
+
+    printf("Mais peso\n");
+    printf("- Cada peixe soma o seu peso.\n");
+    printf("- Peixe da cor do jogador = +2 bonus.\n");
+    printf("- Ex.: PR apanha R de peso 3 = 5.\n");
+    printf("- Ex.: PR apanha Y de peso 3 = 3.\n\n");
+
+    printf("Empilhar peixes\n");
+    printf("- Peixe da cor do jogador = +2.\n");
+    printf("- Peixe neutro ou adversario = +1.\n\n");
+
+    printf("MODO 2 JOGADORES\n");
+    printf("- Quem apanha o peixe recebe os pontos.\n");
+    printf("- A cor do peixe so decide o bonus.\n");
+    printf("- Os jogadores nao podem ocupar a mesma posicao.\n");
+    printf("- Um jogador pode bloquear o outro.\n\n");
+
     printf("Pressiona Enter para voltar ao menu...");
   }
 

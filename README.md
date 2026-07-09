@@ -141,7 +141,9 @@ Até ao momento, o projeto já inclui:
 - Menu principal em português ou inglês
 - Opção para mudar idioma durante a execução
 - Opção `11 - Como jogar / How to play`
-- Explicação dos modos de jogo, regras, tipos de peixe e controlos
+- Ajuda `Como jogar / How to play` reorganizada em duas páginas para melhorar a leitura
+- Página 1 da ajuda com objetivo, modos, tipos de peixe e controlos
+- Página 2 da ajuda com pontuação e regras de dois jogadores
 - Estrutura organizada por vários ficheiros
 - Enumeração para os modos de jogo
 - Estruturas para jogador, peixe e estado do jogo

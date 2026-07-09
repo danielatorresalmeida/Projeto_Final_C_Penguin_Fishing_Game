@@ -358,3 +358,32 @@ Testar a nova ajuda no menu em português e inglês, confirmar se as regras apre
 **Linhas de código escritas ou alteradas (estimativa):**
 
 95
+
+---
+
+## Sessão 12 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Reorganização do ecrã `Como jogar / How to play` em duas páginas.
+- Criação de uma primeira página com objetivo, modos de jogo, tipos de peixe e controlos.
+- Criação de uma segunda página com pontuação por modo e regras de dois jogadores.
+- Redução do texto apresentado em cada ecrã para facilitar a leitura no terminal.
+- Adição de limpeza simples do terminal antes de mostrar cada página da ajuda.
+- Manutenção das versões em português e inglês.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi manter todas as regras importantes sem deixar o ecrã demasiado cheio de texto.
+
+**Como resolvi:**
+
+Dividi a ajuda em duas páginas. A primeira página explica rapidamente como jogar e quais são os controlos. A segunda página fica dedicada à pontuação e às regras de dois jogadores. Também usei textos mais curtos e alinhados para facilitar a leitura.
+
+**Próximo passo planeado:**
+
+Testar a ajuda nos dois idiomas e depois avançar para níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+70

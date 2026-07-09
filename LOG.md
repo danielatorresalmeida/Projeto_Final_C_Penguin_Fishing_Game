@@ -449,3 +449,62 @@ Testar a nova disposição visual nos três modos de jogo e em modo solo e dois 
 **Linhas de código escritas ou alteradas (estimativa):**
 
 85
+
+---
+
+## Sessão 15 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Substituição dos símbolos antigos dos anzóis `H` e `h` por símbolos direcionais.
+- Adição do anzol `-<` para o jogador vermelho `PR`.
+- Adição do anzol `>-` para o jogador amarelo `PY`.
+- Ajuste da zona de captura para considerar os dois caracteres do anzol.
+- Adição de uma animação simples com `*` quando um peixe é capturado.
+- Apresentação do ganho obtido, como `+1`, `+2` ou `+5`, junto ao local da captura.
+- Atualização da legenda do jogo para explicar os novos anzóis e a animação de captura.
+- Atualização do `README.md` com as novas melhorias visuais e de jogabilidade.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi trocar os anzóis de um carácter para dois caracteres sem alterar demasiado a estrutura do tabuleiro, que continua a ser uma matriz simples de caracteres.
+
+**Como resolvi:**
+
+Mantive o tabuleiro como uma matriz de caracteres simples e desenhei os anzóis `-<` e `>-` por cima do tabuleiro, da mesma forma que os jogadores `PR` e `PY` já são desenhados. Também guardei no estado do jogo a posição da última captura, os pontos ganhos e o jogador que capturou o peixe para mostrar a animação com `*` e o feedback de pontuação durante alguns ciclos.
+
+**Próximo passo planeado:**
+
+Testar a nova zona de captura com os anzóis direcionais nos modos solo e dois jogadores. Depois disso, decidir se a próxima melhoria será níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+140
+
+
+---
+
+## Sessão 16 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Alteração da cor da animação de captura `*`.
+- Criação de uma cor própria para a captura, usando magenta.
+- Atualização da legenda para mostrar `*` com a nova cor.
+- Manutenção do feedback de pontos junto da captura.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi garantir que o símbolo `*` não fosse confundido com os peixes `R`, `Y` e `F`.
+
+**Como resolvi:**
+
+Adicionei uma nova cor no `render.c`, chamada `COR_CAPTURA`, e passei a usar essa cor sempre que o símbolo `*` é desenhado no tabuleiro ou na legenda.
+
+**Próximo passo planeado:**
+
+Testar a visibilidade da animação em todos os modos de jogo e ajustar a duração da animação se necessário.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+25

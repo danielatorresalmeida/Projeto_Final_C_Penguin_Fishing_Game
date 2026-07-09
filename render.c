@@ -25,7 +25,8 @@ enum {
   COR_PEIXE_AMARELO,
   COR_PEIXE_NORMAL,
   COR_AGUA,
-  COR_BORDA
+  COR_BORDA,
+  COR_CAPTURA
 };
 
 static int coresAtivas = 0;
@@ -62,6 +63,7 @@ void inicializarInterface(void) {
   init_pair(COR_PEIXE_NORMAL, COLOR_GREEN, fundo);
   init_pair(COR_AGUA, COLOR_CYAN, fundo);
   init_pair(COR_BORDA, COLOR_WHITE, fundo);
+  init_pair(COR_CAPTURA, COLOR_MAGENTA, fundo);
 
   coresAtivas = 1;
 }
@@ -137,20 +139,30 @@ static void desenharCelula(int linha, int coluna, char simbolo) {
     cor = COR_PEIXE_AMARELO;
   } else if (simbolo == 'F') {
     cor = COR_PEIXE_NORMAL;
-  } else if (simbolo == 'H' || simbolo == 'B') {
+  } else if (simbolo == '*') {
+    cor = COR_CAPTURA;
+  } else if (simbolo == 'B') {
     cor = COR_JOGADOR_1;
-  } else if (simbolo == 'h' || simbolo == 'b') {
+  } else if (simbolo == 'b') {
     cor = COR_JOGADOR_2;
   }
 
   if (coresAtivas && cor != 0) {
-    attron(COLOR_PAIR(cor));
+    if (simbolo == '*') {
+      attron(COLOR_PAIR(cor) | A_BOLD);
+    } else {
+      attron(COLOR_PAIR(cor));
+    }
   }
 
   mvaddch(linha, coluna, simbolo);
 
   if (coresAtivas && cor != 0) {
-    attroff(COLOR_PAIR(cor));
+    if (simbolo == '*') {
+      attroff(COLOR_PAIR(cor) | A_BOLD);
+    } else {
+      attroff(COLOR_PAIR(cor));
+    }
   }
 }
 
@@ -574,24 +586,80 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
   if (jogo->modo == EMPILHAR) {
     mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "B/b  cesto");
   } else {
-    mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "H/h  anzol");
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2,
+                        "PR", COR_JOGADOR_1);
+    mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 5, "-<");
+
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 9, PAINEL_DIREITO_COLUNA + 2,
+                        "PY", COR_JOGADOR_2);
+    mvprintw(PAINEL_DIREITO_LINHA + 9, PAINEL_DIREITO_COLUNA + 5, ">-");
   }
 
-  desenharTitulo(PAINEL_DIREITO_LINHA + 11, PAINEL_DIREITO_COLUNA + 2,
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 10, PAINEL_DIREITO_COLUNA + 2,
+                      "*", COR_CAPTURA);
+  mvprintw(PAINEL_DIREITO_LINHA + 10, PAINEL_DIREITO_COLUNA + 6, "captura");
+
+  desenharTitulo(PAINEL_DIREITO_LINHA + 12, PAINEL_DIREITO_COLUNA + 2,
                  "CONTROLOS");
 
-  desenharTextoComCor(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 2,
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 2,
                       "PR", COR_JOGADOR_1);
-  mvprintw(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 6, "WASD");
+  mvprintw(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 6, "WASD");
 
   if (jogo->jogadores == 2) {
-    desenharTextoComCor(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 2,
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 15, PAINEL_DIREITO_COLUNA + 2,
                         "PY", COR_JOGADOR_2);
-    mvprintw(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 6, "setas");
+    mvprintw(PAINEL_DIREITO_LINHA + 15, PAINEL_DIREITO_COLUNA + 6, "setas");
   }
 
   mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
            "P pausa | Q sair");
+}
+
+static void desenharAnzois(const EstadoJogo *jogo) {
+  if (jogo->modo == EMPILHAR) {
+    return;
+  }
+
+  // PR pesca para a direita.
+  desenharTextoComCor(TABULEIRO_LINHA + jogo->p1.linha,
+                      TABULEIRO_COLUNA + jogo->p1.coluna + 2, "-<",
+                      COR_JOGADOR_1);
+
+  if (jogo->jogadores == 2) {
+    // PY pesca para a esquerda.
+    desenharTextoComCor(TABULEIRO_LINHA + jogo->p2.linha,
+                        TABULEIRO_COLUNA + jogo->p2.coluna - 2, ">-",
+                        COR_JOGADOR_2);
+  }
+}
+
+static void desenharAnimacaoCaptura(const EstadoJogo *jogo) {
+  char texto[12];
+  int linha;
+  int coluna;
+  int colunaTexto;
+  int corJogador;
+
+  if (jogo->animacaoCaptura <= 0) {
+    return;
+  }
+
+  linha = TABULEIRO_LINHA + jogo->animacaoLinha;
+  coluna = TABULEIRO_COLUNA + jogo->animacaoColuna;
+
+  desenharTextoComCor(linha, coluna, "*", COR_CAPTURA);
+
+  snprintf(texto, sizeof(texto), "+%d", jogo->animacaoPontos);
+
+  if (jogo->animacaoColuna < COLUNAS - 4) {
+    colunaTexto = coluna + 2;
+  } else {
+    colunaTexto = coluna - 3;
+  }
+
+  corJogador = jogo->animacaoJogador == 2 ? COR_JOGADOR_2 : COR_JOGADOR_1;
+  desenharTextoComCor(linha, colunaTexto, texto, corJogador);
 }
 
 static void desenharRodape(void) {
@@ -638,12 +706,15 @@ void desenharJogo(const EstadoJogo *jogo) {
                        jogo->peixe.simbolo);
   }
 
+  if (jogo->animacaoCaptura > 0) {
+    colocarNoTabuleiro(tabuleiro, jogo->animacaoLinha, jogo->animacaoColuna,
+                       '*');
+  }
+
   obterZonaCaptura(&jogo->p1, jogo->modo, 1, &linhaCaptura, &colunaCaptura);
 
   if (jogo->modo == EMPILHAR) {
     colocarNoTabuleiro(tabuleiro, linhaCaptura, colunaCaptura, 'B');
-  } else {
-    colocarNoTabuleiro(tabuleiro, linhaCaptura, colunaCaptura, 'H');
   }
 
   if (jogo->jogadores == 2) {
@@ -651,8 +722,6 @@ void desenharJogo(const EstadoJogo *jogo) {
 
     if (jogo->modo == EMPILHAR) {
       colocarNoTabuleiro(tabuleiro, linhaCaptura, colunaCaptura, 'b');
-    } else {
-      colocarNoTabuleiro(tabuleiro, linhaCaptura, colunaCaptura, 'h');
     }
   }
 
@@ -673,6 +742,9 @@ void desenharJogo(const EstadoJogo *jogo) {
                      tabuleiro[i][j]);
     }
   }
+
+  desenharAnzois(jogo);
+  desenharAnimacaoCaptura(jogo);
 
   desenharTextoComCor(TABULEIRO_LINHA + jogo->p1.linha,
                       TABULEIRO_COLUNA + jogo->p1.coluna, "PR", COR_JOGADOR_1);

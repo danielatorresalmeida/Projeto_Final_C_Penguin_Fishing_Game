@@ -147,8 +147,9 @@ void mostrarComoJogar(Idioma idioma) {
     printf("- Y : gives bonus to PY.\n\n");
 
     printf("CONTROLS\n");
-    printf("- PR : W A S D\n");
-    printf("- PY : arrow keys\n");
+    printf("- PR : W A S D | hook -<\n");
+    printf("- PY : arrow keys | hook >-\n");
+    printf("- *  : caught fish animation\n");
     printf("- P  : pause / continue\n");
     printf("- Q  : quit and show result\n\n");
 
@@ -208,8 +209,9 @@ void mostrarComoJogar(Idioma idioma) {
     printf("- Y : da bonus ao PY.\n\n");
 
     printf("CONTROLOS\n");
-    printf("- PR : W A S D\n");
-    printf("- PY : setas do teclado\n");
+    printf("- PR : W A S D | anzol -<\n");
+    printf("- PY : setas | anzol >-\n");
+    printf("- *  : animacao de captura\n");
     printf("- P  : pausa / continua\n");
     printf("- Q  : sair e mostrar resultado\n\n");
 

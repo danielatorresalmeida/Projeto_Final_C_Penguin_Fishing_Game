@@ -3,7 +3,7 @@
 
 #define OPCAO_INVALIDA -1
 #define OPCAO_MINIMA 0
-#define OPCAO_MAXIMA 10
+#define OPCAO_MAXIMA 11
 
 #define LINHAS 15
 #define COLUNAS 40
@@ -14,6 +14,8 @@ typedef enum {
   MAIS_PESO = 2,
   EMPILHAR = 3
 } ModoJogo;
+
+typedef enum { IDIOMA_SAIR = 0, IDIOMA_EN = 1, IDIOMA_PT = 2 } Idioma;
 
 typedef struct {
   char nome[30];
@@ -43,6 +45,11 @@ typedef struct {
   Jogador p1;
   Jogador p2;
   Peixe peixe;
+  int animacaoCaptura;
+  int animacaoLinha;
+  int animacaoColuna;
+  int animacaoPontos;
+  int animacaoJogador;
 } EstadoJogo;
 
 void iniciarJogo(EstadoJogo *jogo, int opcao);

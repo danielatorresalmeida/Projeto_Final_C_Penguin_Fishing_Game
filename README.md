@@ -14,7 +14,7 @@ https://scratch.mit.edu/projects/1311165580/editor/
 
 O objetivo do jogo é controlar um pinguim e apanhar peixes que aparecem no tabuleiro. Dependendo do modo escolhido, o jogador pode tentar apanhar mais peixes, acumular mais peso ou empilhar peixes.
 
-O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, melhor resposta das teclas nos dois jogadores, resultado final e opção para jogar novamente.
+O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, melhor resposta das teclas nos dois jogadores, animação simples de captura, resultado final e opção para jogar novamente.
 
 ## Modos de Jogo
 
@@ -64,22 +64,22 @@ Nos modos de dois jogadores, `PR` e `PY` não podem ocupar nem atravessar a mesm
 Durante a partida, o ecrã mostra informação rápida para ajudar o jogador a tomar decisões sem abrir o menu de ajuda:
 
 - Painel esquerdo com objetivo do modo e regra rápida de pontuação.
-- Painel direito com legenda, controlos e dados do peixe atual.
-- Secção `PEIXE ATUAL`, mostrando o símbolo do peixe, peso quando aplicável e quanto cada jogador ganha se o apanhar.
+- Painel direito com legenda e controlos.
+- Linha `PEIXE`, por cima do tabuleiro, mostrando o símbolo do peixe, peso quando aplicável e quanto cada jogador ganha se o apanhar.
+- Anzóis direcionais: `PR` usa `-<` e `PY` usa `>-`.
+- Animação simples com `*` quando um peixe é capturado.
+- O `*` da captura usa uma cor própria, magenta, para se destacar dos peixes.
+- Feedback visual do ganho, como `+1`, `+2` ou `+5`, junto ao local da captura.
 - Indicação de `bloqueio ativo` nos modos de dois jogadores.
 
 Exemplos de informação dinâmica:
 
 ```text
-PEIXE ATUAL
-R peso 3
-PR +5 | PY +3
+PEIXE: R peso 3 | PR +5 | PY +3
 ```
 
 ```text
-PEIXE ATUAL
-Y pilha
-PR +1 | PY +2
+PEIXE: Y pilha | PR +1 | PY +2
 ```
 
 ## Controlos
@@ -105,14 +105,17 @@ PR +1 | PY +2
 - `A`: mover para a esquerda
 - `S`: mover para baixo
 - `D`: mover para a direita
+- Anzol visual: `-<`
 
 #### Jogador 2
 
 - Setas do teclado: mover o segundo jogador
+- Anzol visual: `>-`
 - Nos modos de dois jogadores, as teclas de `PR` e `PY` são processadas separadamente para melhorar a jogabilidade
 
 #### Geral
 
+- `*`: aparece brevemente quando um peixe é capturado
 - `P`: pausar ou continuar o jogo
 - `Q`: interromper o jogo e mostrar o resultado final
 
@@ -199,6 +202,10 @@ Até ao momento, o projeto já inclui:
 - Peixe atual mostrado por cima do tabuleiro, entre a pontuação e o timer
 - Ganho previsto de `PR` e `PY` mostrado perto do tabuleiro
 - Peso do peixe atual mostrado no modo **Mais peso**
+- Anzóis direcionais nos modos de pesca: `-<` para `PR` e `>-` para `PY`
+- Ajuste da zona de captura para considerar os dois caracteres do anzol
+- Animação de captura com `*` no local onde o peixe foi apanhado
+- Feedback visual do ganho junto à animação de captura
 - Cores com ncurses para distinguir jogadores, peixes, água e bordas
 - Jogador `PR` apresentado a vermelho
 - Jogador `PY` apresentado a amarelo
@@ -273,14 +280,18 @@ Durante o desenvolvimento foram encontrados alguns problemas, como:
 - Ajustes necessários para impedir que o timer continuasse durante a pausa
 - Correção da lógica antiga em que alguns peixes davam pontos ao adversário
 - Necessidade de impedir sobreposição entre `PR` e `PY`
+- Ajuste visual dos anzóis para substituir `H` e `h` por símbolos mais claros
+- Necessidade de mostrar feedback quando um peixe era capturado
 
-A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada, a jogabilidade do jogador amarelo foi corrigida e o código está melhor organizado.
+A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada, a jogabilidade do jogador amarelo foi corrigida, os anzóis estão mais claros, existe animação de captura e o código está melhor organizado.
 
 ## Próximos Passos
 
 Os próximos objetivos do projeto são:
 
 - Testar todos os modos de jogo de forma completa.
+- Testar os novos anzóis `-<` e `>-` nos modos de pesca.
+- Testar a animação de captura `*` em todos os modos.
 - Testar a nova pontuação nos modos solo e dois jogadores.
 - Testar o bloqueio entre jogadores em todos os modos de dois jogadores.
 - Testar a pausa em todos os modos de jogo.

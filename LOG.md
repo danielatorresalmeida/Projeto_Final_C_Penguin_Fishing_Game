@@ -295,3 +295,66 @@ Testar os modos de dois jogadores para confirmar que `PR` e `PY` respondem corre
 **Linhas de código escritas ou alteradas (estimativa):**
 
 110
+
+---
+
+## Sessão 10 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Atualização da opção `Como jogar / How to play` com explicação mais detalhada da pontuação.
+- Alteração da regra de pontuação nos modos de dois jogadores.
+- Correção para que quem apanha o peixe receba sempre a pontuação.
+- Manutenção do bónus quando o jogador apanha um peixe da sua própria cor.
+- Remoção da lógica em que um peixe da cor do adversário podia dar ponto ao adversário.
+- Alteração do modo **Empilhar peixes** para usar bónus positivo em vez de penalizar o jogador.
+- Implementação de bloqueio entre jogadores para impedir que `PR` e `PY` ocupem a mesma posição.
+- Possibilidade de bloquear o adversário ficando lado a lado no tabuleiro.
+- Atualização do `README.md` com as novas regras de pontuação e bloqueio.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi alterar a pontuação sem tornar as regras injustas ou difíceis de explicar. Também foi necessário impedir a sobreposição entre jogadores sem quebrar o movimento normal no tabuleiro.
+
+**Como resolvi:**
+
+Passei a aplicar a pontuação sempre ao jogador que apanha o peixe. A cor do peixe agora serve apenas como bónus para o jogador correspondente. Para o bloqueio, criei validações antes de mover cada jogador, verificando se a nova posição iria ocupar uma célula usada pelo outro jogador.
+
+**Próximo passo planeado:**
+
+Testar as novas regras de pontuação e bloqueio em todos os modos de dois jogadores. Depois disso, a próxima melhoria pode ser adicionar níveis de dificuldade.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+120
+
+---
+
+## Sessão 11 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Atualização do ecrã `Como jogar / How to play` para mostrar a explicação completa da pontuação.
+- Adição da secção `Pontuação por modo` dentro da ajuda do jogo.
+- Explicação detalhada dos valores dos peixes `R`, `Y` e `F` no modo **Mais peixes**.
+- Adição de exemplos no modo **Mais peso** para mostrar como funciona o bónus de cor.
+- Explicação do modo **Empilhar peixes** com bónus de cor e valor normal para peixe neutro ou adversário.
+- Explicação clara de que quem apanha o peixe recebe sempre a pontuação.
+- Explicação da regra de bloqueio entre jogadores no modo de dois jogadores.
+- Atualização do `README.md` para refletir as mesmas regras.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi deixar a explicação completa sem tornar o ecrã de ajuda demasiado confuso.
+
+**Como resolvi:**
+
+Organizei a ajuda por secções: objetivo, modos de jogo, tipos de peixe, pontuação por modo, modo de dois jogadores e controlos. Assim, as regras ficam mais fáceis de ler e o jogador consegue entender rapidamente como cada modo funciona.
+
+**Próximo passo planeado:**
+
+Testar a nova ajuda no menu em português e inglês, confirmar se as regras apresentadas correspondem à lógica implementada e depois avançar para níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+95

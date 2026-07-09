@@ -141,49 +141,100 @@ void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
   }
 }
 
-static int moverJogador1(Jogador *jogador, int tecla) {
-  if ((tecla == 'w' || tecla == 'W') && jogador->linha > 1) {
-    jogador->linha--;
-    return 1;
+static int jogadorOcupaCelula(const Jogador *jogador, int linha, int coluna) {
+  return linha == jogador->linha &&
+         (coluna == jogador->coluna || coluna == jogador->coluna + 1);
+}
+
+static int movimentoDentroDoTabuleiro(int linha, int coluna) {
+  return linha >= 1 && linha < LINHAS && coluna >= 1 && coluna < COLUNAS - 2;
+}
+
+static int movimentoBloqueadoPeloOutroJogador(const EstadoJogo *jogo,
+                                              int numeroJogador, int linha,
+                                              int coluna) {
+  const Jogador *outroJogador;
+
+  if (jogo->jogadores != 2) {
+    return 0;
   }
 
-  if ((tecla == 's' || tecla == 'S') && jogador->linha < LINHAS - 1) {
-    jogador->linha++;
-    return 1;
+  if (numeroJogador == 1) {
+    outroJogador = &jogo->p2;
+  } else {
+    outroJogador = &jogo->p1;
   }
 
-  if ((tecla == 'a' || tecla == 'A') && jogador->coluna > 1) {
-    jogador->coluna--;
-    return 1;
+  // Cada pinguim ocupa duas colunas: PR ou PY.
+  // Se a nova posição tocar numa célula ocupada pelo outro, o movimento é bloqueado.
+  return jogadorOcupaCelula(outroJogador, linha, coluna) ||
+         jogadorOcupaCelula(outroJogador, linha, coluna + 1);
+}
+
+static int tentarMoverJogador(EstadoJogo *jogo, Jogador *jogador,
+                              int numeroJogador, int novaLinha,
+                              int novaColuna) {
+  if (!movimentoDentroDoTabuleiro(novaLinha, novaColuna)) {
+    return 0;
   }
 
-  if ((tecla == 'd' || tecla == 'D') && jogador->coluna < COLUNAS - 3) {
-    jogador->coluna++;
-    return 1;
+  if (movimentoBloqueadoPeloOutroJogador(jogo, numeroJogador, novaLinha,
+                                         novaColuna)) {
+    return 0;
+  }
+
+  jogador->linha = novaLinha;
+  jogador->coluna = novaColuna;
+  return 1;
+}
+
+static int moverJogador1(EstadoJogo *jogo, int tecla) {
+  Jogador *jogador = &jogo->p1;
+
+  if (tecla == 'w' || tecla == 'W') {
+    return tentarMoverJogador(jogo, jogador, 1, jogador->linha - 1,
+                              jogador->coluna);
+  }
+
+  if (tecla == 's' || tecla == 'S') {
+    return tentarMoverJogador(jogo, jogador, 1, jogador->linha + 1,
+                              jogador->coluna);
+  }
+
+  if (tecla == 'a' || tecla == 'A') {
+    return tentarMoverJogador(jogo, jogador, 1, jogador->linha,
+                              jogador->coluna - 1);
+  }
+
+  if (tecla == 'd' || tecla == 'D') {
+    return tentarMoverJogador(jogo, jogador, 1, jogador->linha,
+                              jogador->coluna + 1);
   }
 
   return 0;
 }
 
-static int moverJogador2(Jogador *jogador, int tecla) {
-  if (tecla == KEY_UP && jogador->linha > 1) {
-    jogador->linha--;
-    return 1;
+static int moverJogador2(EstadoJogo *jogo, int tecla) {
+  Jogador *jogador = &jogo->p2;
+
+  if (tecla == KEY_UP) {
+    return tentarMoverJogador(jogo, jogador, 2, jogador->linha - 1,
+                              jogador->coluna);
   }
 
-  if (tecla == KEY_DOWN && jogador->linha < LINHAS - 1) {
-    jogador->linha++;
-    return 1;
+  if (tecla == KEY_DOWN) {
+    return tentarMoverJogador(jogo, jogador, 2, jogador->linha + 1,
+                              jogador->coluna);
   }
 
-  if (tecla == KEY_LEFT && jogador->coluna > 1) {
-    jogador->coluna--;
-    return 1;
+  if (tecla == KEY_LEFT) {
+    return tentarMoverJogador(jogo, jogador, 2, jogador->linha,
+                              jogador->coluna - 1);
   }
 
-  if (tecla == KEY_RIGHT && jogador->coluna < COLUNAS - 3) {
-    jogador->coluna++;
-    return 1;
+  if (tecla == KEY_RIGHT) {
+    return tentarMoverJogador(jogo, jogador, 2, jogador->linha,
+                              jogador->coluna + 1);
   }
 
   return 0;
@@ -215,67 +266,43 @@ static int moverPeixe(Peixe *peixe) {
   return 0;
 }
 
+static int peixeDaCorDoJogador(const Peixe *peixe, int numeroJogador) {
+  return (numeroJogador == 1 && peixe->cor == 1) ||
+         (numeroJogador == 2 && peixe->cor == 2);
+}
+
+static Jogador *obterJogador(EstadoJogo *jogo, int numeroJogador) {
+  if (numeroJogador == 1) {
+    return &jogo->p1;
+  }
+
+  return &jogo->p2;
+}
+
 static void aplicarPontuacao(EstadoJogo *jogo, int numeroJogador) {
   Peixe *peixe = &jogo->peixe;
+  Jogador *jogador = obterJogador(jogo, numeroJogador);
+  int bonusCor = peixeDaCorDoJogador(peixe, numeroJogador);
 
+  // Quem apanha o peixe recebe sempre a pontuação.
+  // A cor própria dá bónus, mas a cor do adversário não transfere pontos.
   if (jogo->modo == MAIS_PEIXES) {
-    if (numeroJogador == 1) {
-      if (peixe->cor == 1) {
-        jogo->p1.peixes += 2;
-      } else if (peixe->cor == 2 && jogo->jogadores == 2) {
-        jogo->p2.peixes += 1;
-      } else {
-        jogo->p1.peixes += 1;
-      }
-    } else {
-      if (peixe->cor == 2) {
-        jogo->p2.peixes += 2;
-      } else if (peixe->cor == 1) {
-        jogo->p1.peixes += 1;
-      } else {
-        jogo->p2.peixes += 1;
-      }
-    }
+    jogador->peixes += bonusCor ? 2 : 1;
+    return;
   }
 
   if (jogo->modo == MAIS_PESO) {
-    if (numeroJogador == 1) {
-      if (peixe->cor == 1) {
-        jogo->p1.peso += peixe->peso + 2;
-      } else if (peixe->cor == 2 && jogo->jogadores == 2) {
-        jogo->p2.peso += peixe->peso;
-      } else {
-        jogo->p1.peso += peixe->peso;
-      }
-    } else {
-      if (peixe->cor == 2) {
-        jogo->p2.peso += peixe->peso + 2;
-      } else if (peixe->cor == 1) {
-        jogo->p1.peso += peixe->peso;
-      } else {
-        jogo->p2.peso += peixe->peso;
-      }
+    jogador->peso += peixe->peso;
+
+    if (bonusCor) {
+      jogador->peso += 2;
     }
+
+    return;
   }
 
   if (jogo->modo == EMPILHAR) {
-    if (numeroJogador == 1) {
-      if (peixe->cor == 2) {
-        if (jogo->p1.empilhados > 0) {
-          jogo->p1.empilhados--;
-        }
-      } else {
-        jogo->p1.empilhados++;
-      }
-    } else {
-      if (peixe->cor == 1) {
-        if (jogo->p2.empilhados > 0) {
-          jogo->p2.empilhados--;
-        }
-      } else {
-        jogo->p2.empilhados++;
-      }
-    }
+    jogador->empilhados += bonusCor ? 2 : 1;
   }
 }
 
@@ -313,12 +340,12 @@ int atualizarJogo(EstadoJogo *jogo, int teclaJogador1, int teclaJogador2,
 
   // Cada jogador tem uma tecla própria para permitir melhor jogabilidade
   // nos modos de dois jogadores.
-  if (teclaJogador1 != ERR && moverJogador1(&jogo->p1, teclaJogador1)) {
+  if (teclaJogador1 != ERR && moverJogador1(jogo, teclaJogador1)) {
     houveAlteracao = 1;
   }
 
   if (jogo->jogadores == 2 && teclaJogador2 != ERR &&
-      moverJogador2(&jogo->p2, teclaJogador2)) {
+      moverJogador2(jogo, teclaJogador2)) {
     houveAlteracao = 1;
   }
 

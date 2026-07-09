@@ -30,6 +30,34 @@ O jogo inclui os seguintes modos:
 8. Prática: mais peso  
 9. Prática: empilhar peixes  
 
+## Pontuação e Regras de Dois Jogadores
+
+A pontuação foi ajustada para ficar mais simples e justa: quem apanha o peixe recebe sempre a pontuação. A cor do peixe serve apenas para decidir se existe bónus.
+
+### Modo Mais Peixes
+
+- `F`: peixe neutro, vale `+1` peixe para quem o apanha.
+- `R`: peixe vermelho, vale `+2` se for apanhado pelo `PR` e `+1` se for apanhado pelo `PY`.
+- `Y`: peixe amarelo, vale `+2` se for apanhado pelo `PY` e `+1` se for apanhado pelo `PR`.
+
+### Modo Mais Peso
+
+- Cada peixe adiciona o seu peso ao jogador que o apanha.
+- Se o peixe for da cor do jogador, recebe `+2` de bónus no peso.
+- Exemplo: `PR` apanha `R` de peso `3`, recebe `5` pontos.
+- Exemplo: `PR` apanha `Y` de peso `3`, recebe `3` pontos.
+- Exemplo: `PY` apanha `Y` de peso `5`, recebe `7` pontos.
+
+### Modo Empilhar Peixes
+
+- Cada peixe apanhado aumenta a pilha do jogador que o apanha.
+- Peixe da cor do jogador vale `+2` na pilha.
+- Peixe neutro ou da cor do adversário vale `+1` na pilha.
+
+### Bloqueio entre jogadores
+
+Nos modos de dois jogadores, `PR` e `PY` não podem ocupar nem atravessar a mesma posição no tabuleiro. Como cada jogador ocupa dois caracteres, o caminho fica bloqueado quando um jogador tenta passar por cima do outro ou fica encostado a ele. Isto permite bloquear o adversário de forma estratégica sem adicionar penalizações automáticas.
+
 ## Controlos
 
 ### Menu de idioma
@@ -123,12 +151,17 @@ Até ao momento, o projeto já inclui:
 - Movimento com setas para o jogador 2
 - Leitura separada das teclas de `PR` e `PY` nos modos de dois jogadores
 - Melhor jogabilidade do jogador amarelo `PY` quando existem várias teclas acumuladas
+- Bloqueio entre jogadores para impedir que `PR` e `PY` ocupem a mesma posição
+- Possibilidade de bloquear o caminho do adversário ficando lado a lado
 - Tabuleiro com bordas e representação da água
 - Peixe visível no tabuleiro
 - Movimento simples e aleatório do peixe
 - Geração segura do peixe, evitando posições ocupadas
 - Sistema de pontuação por modo de jogo
 - Pontuação apresentada de acordo com o modo escolhido
+- Regra de pontuação em que quem apanha o peixe recebe sempre a pontuação
+- Bónus de cor própria nos modos de pontuação
+- Peixe da cor do adversário conta para quem o apanha, mas sem bónus
 - Pontuação colocada por cima do tabuleiro para maior visibilidade
 - Correção de singular/plural na pontuação, por exemplo `1 peixe` e `2 peixes`
 - Timer centrado e integrado na borda superior do tabuleiro
@@ -207,6 +240,8 @@ Durante o desenvolvimento foram encontrados alguns problemas, como:
 - Ajustes necessários para evitar pontuação duplicada no ecrã
 - Correção de singular/plural no resultado final e na pontuação visual
 - Ajustes necessários para impedir que o timer continuasse durante a pausa
+- Correção da lógica antiga em que alguns peixes davam pontos ao adversário
+- Necessidade de impedir sobreposição entre `PR` e `PY`
 
 A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada, a jogabilidade do jogador amarelo foi corrigida e o código está melhor organizado.
 
@@ -215,6 +250,8 @@ A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu e
 Os próximos objetivos do projeto são:
 
 - Testar todos os modos de jogo de forma completa.
+- Testar a nova pontuação nos modos solo e dois jogadores.
+- Testar o bloqueio entre jogadores em todos os modos de dois jogadores.
 - Testar a pausa em todos os modos de jogo.
 - Melhorar as mensagens quando o jogo é interrompido pelo jogador.
 - Adicionar a opção de guardar o jogo durante a partida.

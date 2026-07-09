@@ -14,7 +14,7 @@ https://scratch.mit.edu/projects/1311165580/editor/
 
 O objetivo do jogo é controlar um pinguim e apanhar peixes que aparecem no tabuleiro. Dependendo do modo escolhido, o jogador pode tentar apanhar mais peixes, acumular mais peso ou empilhar peixes.
 
-O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, resultado final e opção para jogar novamente.
+O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, resultado final e opção para jogar novamente.
 
 ## Modos de Jogo
 
@@ -60,6 +60,7 @@ O jogo inclui os seguintes modos:
 
 #### Geral
 
+- `P`: pausar ou continuar o jogo
 - `Q`: interromper o jogo e mostrar o resultado final
 
 ## Tecnologias Utilizadas
@@ -140,6 +141,13 @@ Até ao momento, o projeto já inclui:
 - Confirmação antes de sair do jogo
 - Interrupção do jogo com a tecla `Q`
 - Pontuação final apresentada mesmo quando o jogo é interrompido
+- Ciclo principal mais responsivo, com menor atraso entre leituras do teclado
+- Pausa durante a partida com a tecla `P`
+- Timer parado durante a pausa
+- Mensagem visual de pausa no centro do tabuleiro
+- Leitura de várias teclas acumuladas por ciclo, usando a tecla mais recente
+- Redesenho do ecrã apenas quando o estado do jogo muda
+- Velocidade do peixe ajustada para manter o equilíbrio após a redução do atraso do ciclo
 - Melhor fluidez do jogo com `erase()`, `refresh()` e controlo do ciclo principal
 - Validação das opções do menu com `strtol()`
 - Tratamento de entradas inválidas, como letras, símbolos, comandos incompletos e ENTER vazio
@@ -185,7 +193,7 @@ Durante o desenvolvimento foram encontrados alguns problemas, como:
 - Erro de compilação por estar na pasta errada
 - Erro `Permission denied` quando o executável estava aberto
 - Tremor no ecrã durante o jogo
-- Algum atraso na resposta das teclas
+- Algum atraso na resposta das teclas quando o jogador pressionava teclas continuamente
 - Problemas com chavetas `{}` ao alterar a função `cicloJogo()`
 - Erro ao executar uma versão antiga do jogo depois de uma compilação falhada
 - Dificuldade ao validar entradas inválidas no menu
@@ -194,16 +202,17 @@ Durante o desenvolvimento foram encontrados alguns problemas, como:
 - Necessidade de reorganizar o código quando o ficheiro `game.c` ficou demasiado longo
 - Ajustes necessários para evitar pontuação duplicada no ecrã
 - Correção de singular/plural no resultado final e na pontuação visual
+- Ajustes necessários para impedir que o timer continuasse durante a pausa
 
-A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro e o código está melhor organizado.
+A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada e o código está melhor organizado.
 
 ## Próximos Passos
 
 Os próximos objetivos do projeto são:
 
 - Testar todos os modos de jogo de forma completa.
+- Testar a pausa em todos os modos de jogo.
 - Melhorar as mensagens quando o jogo é interrompido pelo jogador.
-- Criar uma opção de pausa durante a partida.
 - Adicionar a opção de guardar o jogo durante a partida.
 - Resolver o conflito da tecla `S`, porque atualmente ela move o jogador 1 para baixo.
 - Criar uma opção no menu principal para retomar um jogo guardado.

@@ -36,6 +36,8 @@ void inicializarInterface(void) {
   noecho();
   keypad(stdscr, TRUE);
   nodelay(stdscr, TRUE);
+  leaveok(stdscr, TRUE);
+  set_escdelay(25);
   curs_set(0);
   clear();
   refresh();
@@ -442,12 +444,40 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
     mvprintw(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 6, "setas");
   }
 
-  mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2, "Q    sair");
+  mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
+           "P pausa | Q sair");
 }
 
 static void desenharRodape(void) {
   mvprintw(TABULEIRO_LINHA + LINHAS + 2, TABULEIRO_COLUNA - 1,
-           "Q para sair | ultimos 10 segundos em vermelho");
+           "P para pausar | Q para sair | ultimos 10 segundos em vermelho");
+}
+
+void desenharPausa(void) {
+  int largura = 34;
+  int altura = 5;
+  int linha = TABULEIRO_LINHA + (LINHAS / 2) - 2;
+  int coluna = TABULEIRO_COLUNA + (COLUNAS - largura) / 2;
+  const char *texto1 = "JOGO PAUSADO";
+  const char *texto2 = "P continuar | Q sair";
+
+  // Caixa simples por cima do tabuleiro.
+  desenharCaixa(linha, coluna, altura, largura, "PAUSA");
+
+  if (coresAtivas) {
+    attron(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+
+  mvprintw(linha + 2, coluna + (largura - (int)strlen(texto1)) / 2, "%s",
+           texto1);
+  mvprintw(linha + 3, coluna + (largura - (int)strlen(texto2)) / 2, "%s",
+           texto2);
+
+  if (coresAtivas) {
+    attroff(COLOR_PAIR(COR_BORDA) | A_BOLD);
+  }
+
+  refresh();
 }
 
 void desenharJogo(const EstadoJogo *jogo) {

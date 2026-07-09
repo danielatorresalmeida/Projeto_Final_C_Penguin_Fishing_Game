@@ -6,5 +6,6 @@
 void inicializarInterface(void);
 void finalizarInterface(void);
 void desenharJogo(const EstadoJogo *jogo);
+void desenharPausa(void);
 
 #endif

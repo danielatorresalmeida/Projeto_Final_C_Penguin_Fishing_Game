@@ -128,6 +128,10 @@ Dividi o projeto em ficheiros com responsabilidades diferentes: `menu.c`, `logic
 
 Melhorar o resultado final, mostrando o vencedor de forma mais clara nos modos de dois jogadores.
 
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+300
 ---
 
 ## Sessão 5 – 08/07/2026
@@ -160,6 +164,10 @@ Separei melhor as responsabilidades entre os ficheiros e mantive a função `nom
 
 Melhorar a organização visual do ecrã do jogo durante a partida.
 
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+260
 ---
 
 ## Sessão 6 – 08/07/2026
@@ -190,3 +198,71 @@ Mantive a lógica da pontuação em `logic.c` e concentrei a apresentação visu
 **Próximo passo planeado:**
 
 Testar todos os modos de jogo e considerar a criação de níveis de dificuldade ou uma opção de pausa antes de implementar guardar e retomar jogo.
+
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+240
+---
+
+## Sessão 7 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Melhoria da resposta das teclas durante o jogo.
+- Redução do atraso do ciclo principal de jogo.
+- Leitura de várias teclas acumuladas no buffer a cada ciclo.
+- Utilização da tecla mais recente quando existem várias teclas pendentes.
+- Redesenho do ecrã apenas quando existe alteração no estado do jogo.
+- Alteração de `atualizarJogo()` para devolver se houve ou não alteração.
+- Ajuste das funções de movimento para devolverem se o jogador ou o peixe se moveu.
+- Ajuste da velocidade do peixe para manter o equilíbrio após a redução do tempo de pausa.
+- Pequenas otimizações na interface ncurses com `leaveok()` e `set_escdelay()`.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi melhorar a resposta das teclas sem fazer o peixe mover-se demasiado depressa e sem redesenhar o ecrã mais vezes do que necessário.
+
+**Como resolvi:**
+
+Passei a ler as teclas acumuladas em cada ciclo e usei apenas a tecla mais recente. Também reduzi a pausa do ciclo principal para tornar o jogo mais responsivo. Para compensar isso, aumentei o intervalo de movimento do peixe. Além disso, `atualizarJogo()` passou a indicar quando houve alteração, permitindo redesenhar o ecrã apenas quando necessário.
+
+**Próximo passo planeado:**
+
+Testar todos os modos de jogo e, depois, decidir entre adicionar uma opção de pausa, níveis de dificuldade ou guardar e retomar jogo.
+
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+180
+
+---
+
+## Sessão 8 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Adição da tecla `P` para pausar e continuar o jogo.
+- Criação de uma mensagem visual de pausa no centro do tabuleiro.
+- Bloqueio do movimento dos jogadores durante a pausa.
+- Bloqueio do movimento do peixe durante a pausa.
+- Pausa do timer enquanto o jogo está pausado.
+- Possibilidade de sair da partida com `Q` durante a pausa.
+- Atualização da legenda lateral e do rodapé com a nova tecla de pausa.
+- Limpeza de teclas antigas com `flushinp()` para evitar comandos acumulados ao pausar ou continuar.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi garantir que o timer não continuava a contar durante a pausa e que o jogo não saía da pausa imediatamente por causa de teclas acumuladas no buffer.
+
+**Como resolvi:**
+
+Criei uma função própria para esperar durante a pausa. Durante esse período, o jogo só aceita `P` para continuar ou `Q` para sair. Também usei `flushinp()` para limpar teclas antigas e reiniciei a referência do tempo ao voltar ao jogo.
+
+**Próximo passo planeado:**
+
+Testar a pausa em todos os modos de jogo e depois decidir se a próxima melhoria será níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+90

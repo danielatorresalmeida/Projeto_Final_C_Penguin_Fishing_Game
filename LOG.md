@@ -266,3 +266,32 @@ Testar a pausa em todos os modos de jogo e depois decidir se a próxima melhoria
 **Linhas de código escritas ou alteradas (estimativa):**
 
 90
+
+---
+
+## Sessão 9 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Correção da jogabilidade do jogador amarelo `PY` nos modos de dois jogadores.
+- Separação da leitura das teclas do jogador vermelho e do jogador amarelo.
+- Criação de uma estrutura de entrada para guardar a última tecla de cada jogador no mesmo ciclo.
+- Alteração de `atualizarJogo()` para receber uma tecla para `PR` e outra para `PY`.
+- Melhoria do comportamento quando os dois jogadores pressionam teclas ao mesmo tempo ou quase ao mesmo tempo.
+- Manutenção da leitura rápida do teclado sem prejudicar o jogador amarelo.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi corrigir a resposta do jogador amarelo sem voltar ao problema anterior de atraso nas teclas. O sistema estava a usar apenas a última tecla lida no buffer, o que podia fazer com que a tecla de um jogador substituísse a tecla do outro.
+
+**Como resolvi:**
+
+Passei a guardar separadamente a última tecla do jogador vermelho e a última tecla do jogador amarelo em cada ciclo. Assim, quando existem teclas acumuladas, o jogo consegue atualizar os dois jogadores no mesmo ciclo, em vez de mover apenas aquele que pressionou a tecla mais recente.
+
+**Próximo passo planeado:**
+
+Testar os modos de dois jogadores para confirmar que `PR` e `PY` respondem corretamente. Depois disso, a próxima melhoria pode ser adicionar níveis de dificuldade.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+110

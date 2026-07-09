@@ -4,9 +4,14 @@
 #include "game.h"
 #include <time.h>
 
-void atualizarJogo(EstadoJogo *jogo, int tecla, int *contadorMovimentoPeixe,
-                   time_t *ultimoSegundo);
-void obterZonaCaptura(const Jogador *jogador, ModoJogo modo,
-                      int numeroJogador, int *linha, int *coluna);
+void iniciarJogo(EstadoJogo *jogo, int opcao);
+
+int atualizarJogo(EstadoJogo *jogo, int teclaJogador1, int teclaJogador2,
+                  int *contadorMovimentoPeixe, time_t *ultimoSegundo);
+
+void mostrarResultado(const EstadoJogo *jogo);
+
+void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
+                      int *linha, int *coluna);
 
 #endif

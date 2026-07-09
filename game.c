@@ -5,18 +5,47 @@
 #include <time.h>
 
 #define ATRASO_CICLO_MS 25
-#define MAX_TECLAS_POR_CICLO 20
+#define MAX_TECLAS_POR_CICLO 25
+
+typedef struct {
+  int jogador1;
+  int jogador2;
+  int pausar;
+  int sair;
+} EntradaJogo;
 
 static int teclaSair(int tecla) { return tecla == 'q' || tecla == 'Q'; }
 
 static int teclaPausa(int tecla) { return tecla == 'p' || tecla == 'P'; }
 
-static int lerUltimaTecla(int *sair) {
-  int tecla;
-  int ultimaTecla = ERR;
-  int teclasLidas = 0;
+static int teclaDoJogador1(int tecla) {
+  return tecla == 'w' || tecla == 'W' || tecla == 'a' || tecla == 'A' ||
+         tecla == 's' || tecla == 'S' || tecla == 'd' || tecla == 'D';
+}
 
-  // Lê as teclas acumuladas e usa só a mais recente.
+static int teclaDoJogador2(int tecla) {
+  return tecla == KEY_UP || tecla == KEY_DOWN || tecla == KEY_LEFT ||
+         tecla == KEY_RIGHT;
+}
+
+static EntradaJogo criarEntradaVazia(void) {
+  EntradaJogo entrada;
+
+  entrada.jogador1 = ERR;
+  entrada.jogador2 = ERR;
+  entrada.pausar = 0;
+  entrada.sair = 0;
+
+  return entrada;
+}
+
+static EntradaJogo lerEntradaJogo(void) {
+  int tecla;
+  int teclasLidas = 0;
+  EntradaJogo entrada = criarEntradaVazia();
+
+  // Lê várias teclas acumuladas para reduzir atraso.
+  // Guarda a tecla mais recente de cada jogador separadamente.
   while (teclasLidas < MAX_TECLAS_POR_CICLO) {
     tecla = getch();
 
@@ -25,15 +54,22 @@ static int lerUltimaTecla(int *sair) {
     }
 
     if (teclaSair(tecla)) {
-      *sair = 1;
-      return tecla;
+      entrada.sair = 1;
+      break;
     }
 
-    ultimaTecla = tecla;
+    if (teclaPausa(tecla)) {
+      entrada.pausar = 1;
+    } else if (teclaDoJogador1(tecla)) {
+      entrada.jogador1 = tecla;
+    } else if (teclaDoJogador2(tecla)) {
+      entrada.jogador2 = tecla;
+    }
+
     teclasLidas++;
   }
 
-  return ultimaTecla;
+  return entrada;
 }
 
 static int esperarDurantePausa(void) {
@@ -59,23 +95,22 @@ static int esperarDurantePausa(void) {
 }
 
 void cicloJogo(EstadoJogo *jogo) {
-  int tecla;
-  int sair = 0;
+  EntradaJogo entrada;
   int contadorMovimentoPeixe = 0;
   time_t ultimoSegundo = time(NULL);
 
   inicializarInterface();
   desenharJogo(jogo);
 
-  while (jogo->ativo && jogo->tempo > 0 && !sair) {
-    tecla = lerUltimaTecla(&sair);
+  while (jogo->ativo && jogo->tempo > 0) {
+    entrada = lerEntradaJogo();
 
-    if (sair) {
+    if (entrada.sair) {
       jogo->ativo = 0;
       break;
     }
 
-    if (teclaPausa(tecla)) {
+    if (entrada.pausar) {
       desenharPausa();
 
       if (!esperarDurantePausa()) {
@@ -87,8 +122,8 @@ void cicloJogo(EstadoJogo *jogo) {
       ultimoSegundo = time(NULL);
       contadorMovimentoPeixe = 0;
       desenharJogo(jogo);
-    } else if (atualizarJogo(jogo, tecla, &contadorMovimentoPeixe,
-                             &ultimoSegundo)) {
+    } else if (atualizarJogo(jogo, entrada.jogador1, entrada.jogador2,
+                             &contadorMovimentoPeixe, &ultimoSegundo)) {
       desenharJogo(jogo);
     }
 

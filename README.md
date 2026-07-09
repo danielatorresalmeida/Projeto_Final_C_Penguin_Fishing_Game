@@ -14,7 +14,7 @@ https://scratch.mit.edu/projects/1311165580/editor/
 
 O objetivo do jogo é controlar um pinguim e apanhar peixes que aparecem no tabuleiro. Dependendo do modo escolhido, o jogador pode tentar apanhar mais peixes, acumular mais peso ou empilhar peixes.
 
-O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, resultado final e opção para jogar novamente.
+O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, melhor resposta das teclas nos dois jogadores, resultado final e opção para jogar novamente.
 
 ## Modos de Jogo
 
@@ -57,6 +57,7 @@ O jogo inclui os seguintes modos:
 #### Jogador 2
 
 - Setas do teclado: mover o segundo jogador
+- Nos modos de dois jogadores, as teclas de `PR` e `PY` são processadas separadamente para melhorar a jogabilidade
 
 #### Geral
 
@@ -120,6 +121,8 @@ Até ao momento, o projeto já inclui:
 - Integração da biblioteca ncurses
 - Movimento com WASD para o jogador 1
 - Movimento com setas para o jogador 2
+- Leitura separada das teclas de `PR` e `PY` nos modos de dois jogadores
+- Melhor jogabilidade do jogador amarelo `PY` quando existem várias teclas acumuladas
 - Tabuleiro com bordas e representação da água
 - Peixe visível no tabuleiro
 - Movimento simples e aleatório do peixe
@@ -145,7 +148,8 @@ Até ao momento, o projeto já inclui:
 - Pausa durante a partida com a tecla `P`
 - Timer parado durante a pausa
 - Mensagem visual de pausa no centro do tabuleiro
-- Leitura de várias teclas acumuladas por ciclo, usando a tecla mais recente
+- Leitura de várias teclas acumuladas por ciclo
+- Utilização da tecla mais recente de cada jogador, em vez de uma única tecla global
 - Redesenho do ecrã apenas quando o estado do jogo muda
 - Velocidade do peixe ajustada para manter o equilíbrio após a redução do atraso do ciclo
 - Melhor fluidez do jogo com `erase()`, `refresh()` e controlo do ciclo principal
@@ -204,7 +208,7 @@ Durante o desenvolvimento foram encontrados alguns problemas, como:
 - Correção de singular/plural no resultado final e na pontuação visual
 - Ajustes necessários para impedir que o timer continuasse durante a pausa
 
-A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada e o código está melhor organizado.
+A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada, a jogabilidade do jogador amarelo foi corrigida e o código está melhor organizado.
 
 ## Próximos Passos
 

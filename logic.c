@@ -141,42 +141,78 @@ void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
   }
 }
 
-static void moverJogador1(Jogador *jogador, int tecla) {
+static int moverJogador1(Jogador *jogador, int tecla) {
   if ((tecla == 'w' || tecla == 'W') && jogador->linha > 1) {
     jogador->linha--;
-  } else if ((tecla == 's' || tecla == 'S') && jogador->linha < LINHAS - 1) {
-    jogador->linha++;
-  } else if ((tecla == 'a' || tecla == 'A') && jogador->coluna > 1) {
-    jogador->coluna--;
-  } else if ((tecla == 'd' || tecla == 'D') && jogador->coluna < COLUNAS - 3) {
-    jogador->coluna++;
+    return 1;
   }
+
+  if ((tecla == 's' || tecla == 'S') && jogador->linha < LINHAS - 1) {
+    jogador->linha++;
+    return 1;
+  }
+
+  if ((tecla == 'a' || tecla == 'A') && jogador->coluna > 1) {
+    jogador->coluna--;
+    return 1;
+  }
+
+  if ((tecla == 'd' || tecla == 'D') && jogador->coluna < COLUNAS - 3) {
+    jogador->coluna++;
+    return 1;
+  }
+
+  return 0;
 }
 
-static void moverJogador2(Jogador *jogador, int tecla) {
+static int moverJogador2(Jogador *jogador, int tecla) {
   if (tecla == KEY_UP && jogador->linha > 1) {
     jogador->linha--;
-  } else if (tecla == KEY_DOWN && jogador->linha < LINHAS - 1) {
-    jogador->linha++;
-  } else if (tecla == KEY_LEFT && jogador->coluna > 1) {
-    jogador->coluna--;
-  } else if (tecla == KEY_RIGHT && jogador->coluna < COLUNAS - 3) {
-    jogador->coluna++;
+    return 1;
   }
+
+  if (tecla == KEY_DOWN && jogador->linha < LINHAS - 1) {
+    jogador->linha++;
+    return 1;
+  }
+
+  if (tecla == KEY_LEFT && jogador->coluna > 1) {
+    jogador->coluna--;
+    return 1;
+  }
+
+  if (tecla == KEY_RIGHT && jogador->coluna < COLUNAS - 3) {
+    jogador->coluna++;
+    return 1;
+  }
+
+  return 0;
 }
 
-static void moverPeixe(Peixe *peixe) {
+static int moverPeixe(Peixe *peixe) {
   int direcao = rand() % 4;
 
   if (direcao == 0 && peixe->linha > 1) {
     peixe->linha--;
-  } else if (direcao == 1 && peixe->linha < LINHAS - 2) {
-    peixe->linha++;
-  } else if (direcao == 2 && peixe->coluna > 1) {
-    peixe->coluna--;
-  } else if (direcao == 3 && peixe->coluna < COLUNAS - 2) {
-    peixe->coluna++;
+    return 1;
   }
+
+  if (direcao == 1 && peixe->linha < LINHAS - 2) {
+    peixe->linha++;
+    return 1;
+  }
+
+  if (direcao == 2 && peixe->coluna > 1) {
+    peixe->coluna--;
+    return 1;
+  }
+
+  if (direcao == 3 && peixe->coluna < COLUNAS - 2) {
+    peixe->coluna++;
+    return 1;
+  }
+
+  return 0;
 }
 
 static void aplicarPontuacao(EstadoJogo *jogo, int numeroJogador) {
@@ -254,41 +290,59 @@ static int jogadorCapturou(const Jogador *jogador, const Peixe *peixe,
          peixe->coluna == colunaCaptura;
 }
 
-static void verificarCapturas(EstadoJogo *jogo) {
+static int verificarCapturas(EstadoJogo *jogo) {
   if (jogadorCapturou(&jogo->p1, &jogo->peixe, jogo->modo, 1)) {
     aplicarPontuacao(jogo, 1);
     gerarPeixe(jogo);
-    return;
+    return 1;
   }
 
   if (jogo->jogadores == 2 &&
       jogadorCapturou(&jogo->p2, &jogo->peixe, jogo->modo, 2)) {
     aplicarPontuacao(jogo, 2);
     gerarPeixe(jogo);
+    return 1;
   }
+
+  return 0;
 }
 
-void atualizarJogo(EstadoJogo *jogo, int tecla, int *contadorMovimentoPeixe,
-                   time_t *ultimoSegundo) {
-  moverJogador1(&jogo->p1, tecla);
+int atualizarJogo(EstadoJogo *jogo, int teclaJogador1, int teclaJogador2,
+                  int *contadorMovimentoPeixe, time_t *ultimoSegundo) {
+  int houveAlteracao = 0;
 
-  if (jogo->jogadores == 2) {
-    moverJogador2(&jogo->p2, tecla);
+  // Cada jogador tem uma tecla própria para permitir melhor jogabilidade
+  // nos modos de dois jogadores.
+  if (teclaJogador1 != ERR && moverJogador1(&jogo->p1, teclaJogador1)) {
+    houveAlteracao = 1;
+  }
+
+  if (jogo->jogadores == 2 && teclaJogador2 != ERR &&
+      moverJogador2(&jogo->p2, teclaJogador2)) {
+    houveAlteracao = 1;
   }
 
   (*contadorMovimentoPeixe)++;
 
-  if (*contadorMovimentoPeixe >= 5) {
-    moverPeixe(&jogo->peixe);
+  // Mantém o peixe numa velocidade parecida mesmo com o ciclo mais rápido.
+  if (*contadorMovimentoPeixe >= 14) {
+    if (moverPeixe(&jogo->peixe)) {
+      houveAlteracao = 1;
+    }
     *contadorMovimentoPeixe = 0;
   }
 
-  verificarCapturas(jogo);
+  if (verificarCapturas(jogo)) {
+    houveAlteracao = 1;
+  }
 
   if (jogo->tempo != 9999 && time(NULL) != *ultimoSegundo) {
     jogo->tempo--;
     *ultimoSegundo = time(NULL);
+    houveAlteracao = 1;
   }
+
+  return houveAlteracao;
 }
 
 static int obterPontuacaoFinal(const Jogador *jogador, ModoJogo modo) {

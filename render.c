@@ -2,6 +2,7 @@
 #include "game.h"
 #include "logic.h"
 #include <ncursesw/ncurses.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -16,7 +17,7 @@
 #define PAINEL_DIREITO_LINHA 3
 #define PAINEL_DIREITO_COLUNA 72
 #define PAINEL_DIREITO_LARGURA 30
-#define PAINEL_DIREITO_ALTURA 18
+#define PAINEL_DIREITO_ALTURA 22
 
 enum {
   COR_JOGADOR_1 = 1,
@@ -562,6 +563,19 @@ static void desenharPeixeAtualTopo(const EstadoJogo *jogo) {
   mvprintw(linha, coluna, "%s", detalhe);
 }
 
+
+static char teclaVisivel(int tecla) {
+  if (tecla >= 'a' && tecla <= 'z') {
+    return (char)toupper((unsigned char)tecla);
+  }
+
+  if (tecla >= 'A' && tecla <= 'Z') {
+    return (char)tecla;
+  }
+
+  return '?';
+}
+
 static void desenharPainelDireito(const EstadoJogo *jogo) {
   desenharCaixa(PAINEL_DIREITO_LINHA, PAINEL_DIREITO_COLUNA,
                 PAINEL_DIREITO_ALTURA, PAINEL_DIREITO_LARGURA, "INFO");
@@ -586,13 +600,8 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
   if (jogo->modo == EMPILHAR) {
     mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "B/b  cesto");
   } else {
-    desenharTextoComCor(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2,
-                        "PR", COR_JOGADOR_1);
-    mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 5, "-<");
-
-    desenharTextoComCor(PAINEL_DIREITO_LINHA + 9, PAINEL_DIREITO_COLUNA + 2,
-                        "PY", COR_JOGADOR_2);
-    mvprintw(PAINEL_DIREITO_LINHA + 9, PAINEL_DIREITO_COLUNA + 5, ">-");
+    mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2,
+             "anzol roda 90 graus");
   }
 
   desenharTextoComCor(PAINEL_DIREITO_LINHA + 10, PAINEL_DIREITO_COLUNA + 2,
@@ -614,6 +623,42 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
 
   mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
            "P pausa | Q sair");
+
+  if (jogo->modo != EMPILHAR) {
+    desenharTitulo(PAINEL_DIREITO_LINHA + 18, PAINEL_DIREITO_COLUNA + 2,
+                   "ROTACAO");
+
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 20, PAINEL_DIREITO_COLUNA + 2,
+                        "PR", COR_JOGADOR_1);
+    mvprintw(PAINEL_DIREITO_LINHA + 20, PAINEL_DIREITO_COLUNA + 6, "%c/%c",
+             teclaVisivel(jogo->p1.teclaRodarEsquerda),
+             teclaVisivel(jogo->p1.teclaRodarDireita));
+
+    if (jogo->jogadores == 2) {
+      desenharTextoComCor(PAINEL_DIREITO_LINHA + 21, PAINEL_DIREITO_COLUNA + 2,
+                          "PY", COR_JOGADOR_2);
+      mvprintw(PAINEL_DIREITO_LINHA + 21, PAINEL_DIREITO_COLUNA + 6, "%c/%c",
+               teclaVisivel(jogo->p2.teclaRodarEsquerda),
+               teclaVisivel(jogo->p2.teclaRodarDireita));
+    }
+  }
+}
+
+static void desenharAnzolJogador(const Jogador *jogador, int cor) {
+  int linha = TABULEIRO_LINHA + jogador->linha;
+  int coluna = TABULEIRO_COLUNA + jogador->coluna;
+
+  if (jogador->direcao == DIRECAO_CIMA) {
+    desenharTextoComCor(linha - 2, coluna + 1, "^", cor);
+    desenharTextoComCor(linha - 1, coluna + 1, "|", cor);
+  } else if (jogador->direcao == DIRECAO_DIREITA) {
+    desenharTextoComCor(linha, coluna + 2, "-<", cor);
+  } else if (jogador->direcao == DIRECAO_BAIXO) {
+    desenharTextoComCor(linha + 1, coluna + 1, "|", cor);
+    desenharTextoComCor(linha + 2, coluna + 1, "v", cor);
+  } else {
+    desenharTextoComCor(linha, coluna - 2, ">-", cor);
+  }
 }
 
 static void desenharAnzois(const EstadoJogo *jogo) {
@@ -621,16 +666,10 @@ static void desenharAnzois(const EstadoJogo *jogo) {
     return;
   }
 
-  // PR pesca para a direita.
-  desenharTextoComCor(TABULEIRO_LINHA + jogo->p1.linha,
-                      TABULEIRO_COLUNA + jogo->p1.coluna + 2, "-<",
-                      COR_JOGADOR_1);
+  desenharAnzolJogador(&jogo->p1, COR_JOGADOR_1);
 
   if (jogo->jogadores == 2) {
-    // PY pesca para a esquerda.
-    desenharTextoComCor(TABULEIRO_LINHA + jogo->p2.linha,
-                        TABULEIRO_COLUNA + jogo->p2.coluna - 2, ">-",
-                        COR_JOGADOR_2);
+    desenharAnzolJogador(&jogo->p2, COR_JOGADOR_2);
   }
 }
 

@@ -18,14 +18,42 @@ static int teclaSair(int tecla) { return tecla == 'q' || tecla == 'Q'; }
 
 static int teclaPausa(int tecla) { return tecla == 'p' || tecla == 'P'; }
 
-static int teclaDoJogador1(int tecla) {
-  return tecla == 'w' || tecla == 'W' || tecla == 'a' || tecla == 'A' ||
-         tecla == 's' || tecla == 'S' || tecla == 'd' || tecla == 'D';
+static int teclasIguais(int tecla, int configurada) {
+  if (tecla == ERR || configurada == ERR) {
+    return 0;
+  }
+
+  if (tecla == configurada) {
+    return 1;
+  }
+
+  if (tecla >= 0 && tecla <= 255 && configurada >= 0 && configurada <= 255) {
+    if (tecla >= 'A' && tecla <= 'Z') {
+      tecla = tecla - 'A' + 'a';
+    }
+
+    if (configurada >= 'A' && configurada <= 'Z') {
+      configurada = configurada - 'A' + 'a';
+    }
+
+    return tecla == configurada;
+  }
+
+  return 0;
 }
 
-static int teclaDoJogador2(int tecla) {
+static int teclaDoJogador1(const EstadoJogo *jogo, int tecla) {
+  return tecla == 'w' || tecla == 'W' || tecla == 'a' || tecla == 'A' ||
+         tecla == 's' || tecla == 'S' || tecla == 'd' || tecla == 'D' ||
+         teclasIguais(tecla, jogo->p1.teclaRodarEsquerda) ||
+         teclasIguais(tecla, jogo->p1.teclaRodarDireita);
+}
+
+static int teclaDoJogador2(const EstadoJogo *jogo, int tecla) {
   return tecla == KEY_UP || tecla == KEY_DOWN || tecla == KEY_LEFT ||
-         tecla == KEY_RIGHT;
+         tecla == KEY_RIGHT ||
+         teclasIguais(tecla, jogo->p2.teclaRodarEsquerda) ||
+         teclasIguais(tecla, jogo->p2.teclaRodarDireita);
 }
 
 static EntradaJogo criarEntradaVazia(void) {
@@ -39,7 +67,7 @@ static EntradaJogo criarEntradaVazia(void) {
   return entrada;
 }
 
-static EntradaJogo lerEntradaJogo(void) {
+static EntradaJogo lerEntradaJogo(const EstadoJogo *jogo) {
   int tecla;
   int teclasLidas = 0;
   EntradaJogo entrada = criarEntradaVazia();
@@ -60,9 +88,9 @@ static EntradaJogo lerEntradaJogo(void) {
 
     if (teclaPausa(tecla)) {
       entrada.pausar = 1;
-    } else if (teclaDoJogador1(tecla)) {
+    } else if (teclaDoJogador1(jogo, tecla)) {
       entrada.jogador1 = tecla;
-    } else if (teclaDoJogador2(tecla)) {
+    } else if (teclaDoJogador2(jogo, tecla)) {
       entrada.jogador2 = tecla;
     }
 
@@ -103,7 +131,7 @@ void cicloJogo(EstadoJogo *jogo) {
   desenharJogo(jogo);
 
   while (jogo->ativo && jogo->tempo > 0) {
-    entrada = lerEntradaJogo();
+    entrada = lerEntradaJogo(jogo);
 
     if (entrada.sair) {
       jogo->ativo = 0;

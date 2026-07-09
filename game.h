@@ -17,6 +17,13 @@ typedef enum {
 
 typedef enum { IDIOMA_SAIR = 0, IDIOMA_EN = 1, IDIOMA_PT = 2 } Idioma;
 
+typedef enum {
+  DIRECAO_CIMA = 0,
+  DIRECAO_DIREITA = 1,
+  DIRECAO_BAIXO = 2,
+  DIRECAO_ESQUERDA = 3
+} Direcao;
+
 typedef struct {
   char nome[30];
   char simbolo;
@@ -25,6 +32,9 @@ typedef struct {
   int peixes;
   int peso;
   int empilhados;
+  Direcao direcao;
+  int teclaRodarEsquerda;
+  int teclaRodarDireita;
 } Jogador;
 
 typedef struct {

@@ -508,3 +508,38 @@ Testar a visibilidade da animação em todos os modos de jogo e ajustar a duraç
 **Linhas de código escritas ou alteradas (estimativa):**
 
 25
+
+---
+
+## Sessão 17 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Adição da rotação dos anzóis dos jogadores.
+- Possibilidade de rodar o anzol 90 graus para a esquerda ou para a direita.
+- Suporte para anzol virado para cima, direita, baixo e esquerda.
+- Ajuste da zona de captura para funcionar nas quatro direções do anzol.
+- Adição de teclas padrão de rotação: `Z/X` para `PR` e `N/M` para `PY`.
+- Adição de escolha personalizada das teclas de rotação antes da partida.
+- Validação para impedir teclas repetidas ou teclas já usadas pelo jogo.
+- Nota ao jogador de que `W`, `A`, `S`, `D`, setas, `P` e `Q` não podem ser usadas como teclas de rotação.
+- Atualização do painel lateral para mostrar as teclas de rotação escolhidas.
+- Atualização do menu `Como jogar / How to play` com a nova mecânica de rotação.
+- Atualização do `README.md` com as novas regras e controlos.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi fazer o anzol rodar sem transformar o tabuleiro numa estrutura mais complexa. O jogo continua a usar uma matriz simples de caracteres, mas o anzol agora pode ocupar duas posições diferentes dependendo da direção.
+
+**Como resolvi:**
+
+Adicionei uma enumeração `Direcao` e guardei em cada jogador a direção atual do anzol e as teclas de rotação escolhidas. A lógica calcula as duas células ocupadas pelo anzol conforme a direção. A rotação só é aceite se o anzol continuar dentro do tabuleiro. Também adicionei validação no menu para impedir teclas repetidas ou teclas já reservadas.
+
+**Próximo passo planeado:**
+
+Testar a rotação dos anzóis em todos os modos de pesca, confirmar se a captura funciona nas quatro direções e depois decidir se a próxima melhoria será níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+260
+

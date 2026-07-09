@@ -14,7 +14,7 @@ https://scratch.mit.edu/projects/1311165580/editor/
 
 O objetivo do jogo é controlar um pinguim e apanhar peixes que aparecem no tabuleiro. Dependendo do modo escolhido, o jogador pode tentar apanhar mais peixes, acumular mais peso ou empilhar peixes.
 
-O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, melhor resposta das teclas nos dois jogadores, animação simples de captura, resultado final e opção para jogar novamente.
+O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, melhor resposta das teclas nos dois jogadores, animação simples de captura, rotação de anzóis, teclas de rotação personalizáveis, resultado final e opção para jogar novamente.
 
 ## Modos de Jogo
 
@@ -66,9 +66,10 @@ Durante a partida, o ecrã mostra informação rápida para ajudar o jogador a t
 - Painel esquerdo com objetivo do modo e regra rápida de pontuação.
 - Painel direito com legenda e controlos.
 - Linha `PEIXE`, por cima do tabuleiro, mostrando o símbolo do peixe, peso quando aplicável e quanto cada jogador ganha se o apanhar.
-- Anzóis direcionais: `PR` usa `-<` e `PY` usa `>-`.
+- Anzóis direcionais que podem rodar 90 graus para a esquerda ou para a direita.
 - Animação simples com `*` quando um peixe é capturado.
 - O `*` da captura usa uma cor própria, magenta, para se destacar dos peixes.
+- Teclas de rotação mostradas no painel lateral durante a partida.
 - Feedback visual do ganho, como `+1`, `+2` ou `+5`, junto ao local da captura.
 - Indicação de `bloqueio ativo` nos modos de dois jogadores.
 
@@ -105,16 +106,22 @@ PEIXE: Y pilha | PR +1 | PY +2
 - `A`: mover para a esquerda
 - `S`: mover para baixo
 - `D`: mover para a direita
-- Anzol visual: `-<`
+- `Z`: rodar o anzol 90 graus para a esquerda, por padrão
+- `X`: rodar o anzol 90 graus para a direita, por padrão
+- As teclas de rotação podem ser alteradas antes da partida
 
 #### Jogador 2
 
 - Setas do teclado: mover o segundo jogador
-- Anzol visual: `>-`
+- `N`: rodar o anzol 90 graus para a esquerda, por padrão
+- `M`: rodar o anzol 90 graus para a direita, por padrão
+- As teclas de rotação podem ser alteradas antes da partida
 - Nos modos de dois jogadores, as teclas de `PR` e `PY` são processadas separadamente para melhorar a jogabilidade
 
 #### Geral
 
+- Antes da partida, o jogador pode escolher teclas personalizadas para rodar o anzol
+- Teclas já usadas pelo jogo não podem ser escolhidas para rotação, como `W`, `A`, `S`, `D`, setas, `P` e `Q`
 - `*`: aparece brevemente quando um peixe é capturado
 - `P`: pausar ou continuar o jogo
 - `Q`: interromper o jogo e mostrar o resultado final
@@ -202,8 +209,12 @@ Até ao momento, o projeto já inclui:
 - Peixe atual mostrado por cima do tabuleiro, entre a pontuação e o timer
 - Ganho previsto de `PR` e `PY` mostrado perto do tabuleiro
 - Peso do peixe atual mostrado no modo **Mais peso**
-- Anzóis direcionais nos modos de pesca: `-<` para `PR` e `>-` para `PY`
-- Ajuste da zona de captura para considerar os dois caracteres do anzol
+- Anzóis direcionais nos modos de pesca
+- Rotação dos anzóis 90 graus para a esquerda ou para a direita
+- Possibilidade de escolher teclas personalizadas para rodar o anzol antes da partida
+- Validação para impedir teclas repetidas ou teclas já usadas pelo jogo
+- Painel lateral mostra as teclas de rotação escolhidas
+- Ajuste da zona de captura para considerar as duas posições do anzol em qualquer direção
 - Animação de captura com `*` no local onde o peixe foi apanhado
 - Feedback visual do ganho junto à animação de captura
 - Cores com ncurses para distinguir jogadores, peixes, água e bordas
@@ -282,15 +293,17 @@ Durante o desenvolvimento foram encontrados alguns problemas, como:
 - Necessidade de impedir sobreposição entre `PR` e `PY`
 - Ajuste visual dos anzóis para substituir `H` e `h` por símbolos mais claros
 - Necessidade de mostrar feedback quando um peixe era capturado
+- Necessidade de permitir que o jogador apanhasse peixes que ficavam atrás dele
 
-A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada, a jogabilidade do jogador amarelo foi corrigida, os anzóis estão mais claros, existe animação de captura e o código está melhor organizado.
+A maioria destes problemas já foi corrigida. O jogo está mais fluido, o menu está mais seguro, o tabuleiro está mais claro, a resposta das teclas está mais rápida, a pausa está implementada, a jogabilidade do jogador amarelo foi corrigida, os anzóis estão mais claros, existe animação de captura, os anzóis podem rodar e o código está melhor organizado.
 
 ## Próximos Passos
 
 Os próximos objetivos do projeto são:
 
 - Testar todos os modos de jogo de forma completa.
-- Testar os novos anzóis `-<` e `>-` nos modos de pesca.
+- Testar a rotação dos anzóis nas quatro direções.
+- Testar teclas de rotação padrão e personalizadas.
 - Testar a animação de captura `*` em todos os modos.
 - Testar a nova pontuação nos modos solo e dois jogadores.
 - Testar o bloqueio entre jogadores em todos os modos de dois jogadores.

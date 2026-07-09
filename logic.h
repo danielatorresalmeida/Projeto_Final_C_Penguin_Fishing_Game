@@ -13,5 +13,7 @@ void mostrarResultado(const EstadoJogo *jogo);
 
 void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
                       int *linha, int *coluna);
+void obterCelulaAnzol(const Jogador *jogador, ModoJogo modo, int posicao,
+                      int *linha, int *coluna);
 
 #endif

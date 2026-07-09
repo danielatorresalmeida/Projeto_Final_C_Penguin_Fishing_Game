@@ -1,5 +1,6 @@
 #include "logic.h"
 #include "game.h"
+#include <ctype.h>
 #include <ncursesw/ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,8 @@
 #define COR_VERMELHO "\033[1;31m"
 #define COR_AMARELO "\033[1;33m"
 #define COR_RESET "\033[0m"
+#define ANIMACAO_DURACAO 10
+#define MOVIMENTO_PEIXE_INTERVALO 14
 
 const char *nomeModo(ModoJogo modo) {
   if (modo == MAIS_PEIXES) {
@@ -26,8 +29,35 @@ const char *nomeModo(ModoJogo modo) {
   return "Menu";
 }
 
+static int teclasIguais(int tecla, int configurada) {
+  if (tecla == ERR || configurada == ERR) {
+    return 0;
+  }
+
+  if (tecla == configurada) {
+    return 1;
+  }
+
+  if (tecla >= 0 && tecla <= 255 && configurada >= 0 && configurada <= 255) {
+    return tolower((unsigned char)tecla) ==
+           tolower((unsigned char)configurada);
+  }
+
+  return 0;
+}
+
+static Direcao rodarEsquerda(Direcao direcao) {
+  return (Direcao)((direcao + 3) % 4);
+}
+
+static Direcao rodarDireita(Direcao direcao) {
+  return (Direcao)((direcao + 1) % 4);
+}
+
 static void prepararJogador(Jogador *jogador, const char *nome, char simbolo,
-                            int linha, int coluna) {
+                            int linha, int coluna, Direcao direcao,
+                            int teclaRodarEsquerda,
+                            int teclaRodarDireita) {
   strcpy(jogador->nome, nome);
   jogador->simbolo = simbolo;
   jogador->linha = linha;
@@ -35,23 +65,101 @@ static void prepararJogador(Jogador *jogador, const char *nome, char simbolo,
   jogador->peixes = 0;
   jogador->peso = 0;
   jogador->empilhados = 0;
+  jogador->direcao = direcao;
+  jogador->teclaRodarEsquerda = teclaRodarEsquerda;
+  jogador->teclaRodarDireita = teclaRodarDireita;
+}
+
+void obterCelulaAnzol(const Jogador *jogador, ModoJogo modo, int posicao,
+                      int *linha, int *coluna) {
+  int centroColuna = jogador->coluna + 1;
+
+  if (modo == EMPILHAR) {
+    *linha = jogador->linha - 1;
+    *coluna = jogador->coluna;
+    return;
+  }
+
+  if (posicao < 0) {
+    posicao = 0;
+  }
+
+  if (posicao > 1) {
+    posicao = 1;
+  }
+
+  if (jogador->direcao == DIRECAO_CIMA) {
+    *linha = jogador->linha - 1 - posicao;
+    *coluna = centroColuna;
+  } else if (jogador->direcao == DIRECAO_DIREITA) {
+    *linha = jogador->linha;
+    *coluna = jogador->coluna + 2 + posicao;
+  } else if (jogador->direcao == DIRECAO_BAIXO) {
+    *linha = jogador->linha + 1 + posicao;
+    *coluna = centroColuna;
+  } else {
+    *linha = jogador->linha;
+    *coluna = jogador->coluna - 1 - posicao;
+  }
+}
+
+void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
+                      int *linha, int *coluna) {
+  (void)numeroJogador;
+  obterCelulaAnzol(jogador, modo, 0, linha, coluna);
+}
+
+static int celulaDentroDoTabuleiro(int linha, int coluna) {
+  return linha >= 0 && linha < LINHAS && coluna >= 0 && coluna < COLUNAS;
+}
+
+static int jogadorOcupaCelula(const Jogador *jogador, int linha, int coluna) {
+  return linha == jogador->linha &&
+         (coluna == jogador->coluna || coluna == jogador->coluna + 1);
+}
+
+static int anzolOcupaCelula(const Jogador *jogador, ModoJogo modo, int linha,
+                            int coluna) {
+  int linhaAnzol;
+  int colunaAnzol;
+  int totalCelulas = modo == EMPILHAR ? 1 : 2;
+
+  for (int i = 0; i < totalCelulas; i++) {
+    obterCelulaAnzol(jogador, modo, i, &linhaAnzol, &colunaAnzol);
+
+    if (linha == linhaAnzol && coluna == colunaAnzol) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int anzolDentroDoTabuleiro(const Jogador *jogador, ModoJogo modo) {
+  int linhaAnzol;
+  int colunaAnzol;
+  int totalCelulas = modo == EMPILHAR ? 1 : 2;
+
+  for (int i = 0; i < totalCelulas; i++) {
+    obterCelulaAnzol(jogador, modo, i, &linhaAnzol, &colunaAnzol);
+
+    if (!celulaDentroDoTabuleiro(linhaAnzol, colunaAnzol)) {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 static int posicaoOcupada(const EstadoJogo *jogo, int linha, int coluna) {
-  if (linha == jogo->p1.linha && coluna == jogo->p1.coluna) {
-    return 1;
-  }
-
-  if (linha == jogo->p1.linha && coluna == jogo->p1.coluna + 1) {
+  if (jogadorOcupaCelula(&jogo->p1, linha, coluna) ||
+      anzolOcupaCelula(&jogo->p1, jogo->modo, linha, coluna)) {
     return 1;
   }
 
   if (jogo->jogadores == 2) {
-    if (linha == jogo->p2.linha && coluna == jogo->p2.coluna) {
-      return 1;
-    }
-
-    if (linha == jogo->p2.linha && coluna == jogo->p2.coluna + 1) {
+    if (jogadorOcupaCelula(&jogo->p2, linha, coluna) ||
+        anzolOcupaCelula(&jogo->p2, jogo->modo, linha, coluna)) {
       return 1;
     }
   }
@@ -124,8 +232,10 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
     jogo->tempo = 9999;
   }
 
-  prepararJogador(&jogo->p1, "Pinguim Vermelho", 'P', LINHAS - 2, 5);
-  prepararJogador(&jogo->p2, "Pinguim Amarelo", 'Y', LINHAS - 2, COLUNAS - 6);
+  prepararJogador(&jogo->p1, "Pinguim Vermelho", 'P', LINHAS - 2, 5,
+                  DIRECAO_DIREITA, 'z', 'x');
+  prepararJogador(&jogo->p2, "Pinguim Amarelo", 'Y', LINHAS - 2,
+                  COLUNAS - 6, DIRECAO_ESQUERDA, 'n', 'm');
 
   jogo->animacaoCaptura = 0;
   jogo->animacaoLinha = 0;
@@ -136,46 +246,23 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
   gerarPeixe(jogo);
 }
 
-void obterZonaCaptura(const Jogador *jogador, ModoJogo modo, int numeroJogador,
-                      int *linha, int *coluna) {
-  if (modo == EMPILHAR) {
-    *linha = jogador->linha - 1;
-    *coluna = jogador->coluna;
-    return;
-  }
-
-  *linha = jogador->linha;
-
-  if (numeroJogador == 1) {
-    // O anzol do PR ocupa as posições -< à direita do jogador.
-    *coluna = jogador->coluna + 2;
-  } else {
-    // O anzol do PY ocupa as posições >- à esquerda do jogador.
-    *coluna = jogador->coluna - 2;
-  }
-}
-
-static int jogadorOcupaCelula(const Jogador *jogador, int linha, int coluna) {
-  return linha == jogador->linha &&
-         (coluna == jogador->coluna || coluna == jogador->coluna + 1);
-}
-
 static int movimentoDentroDoTabuleiro(const EstadoJogo *jogo, int numeroJogador,
                                       int linha, int coluna) {
+  Jogador teste;
+
   if (linha < 1 || linha >= LINHAS) {
     return 0;
   }
 
-  if (jogo->modo == EMPILHAR) {
-    return coluna >= 1 && coluna < COLUNAS - 2;
+  if (coluna < 1 || coluna > COLUNAS - 3) {
+    return 0;
   }
 
-  // Nos modos com anzol, deixa espaço para desenhar -< e >-.
-  if (numeroJogador == 1) {
-    return coluna >= 1 && coluna <= COLUNAS - 4;
-  }
+  teste = numeroJogador == 1 ? jogo->p1 : jogo->p2;
+  teste.linha = linha;
+  teste.coluna = coluna;
 
-  return coluna >= 2 && coluna < COLUNAS - 2;
+  return anzolDentroDoTabuleiro(&teste, jogo->modo);
 }
 
 static int movimentoBloqueadoPeloOutroJogador(const EstadoJogo *jogo,
@@ -187,14 +274,10 @@ static int movimentoBloqueadoPeloOutroJogador(const EstadoJogo *jogo,
     return 0;
   }
 
-  if (numeroJogador == 1) {
-    outroJogador = &jogo->p2;
-  } else {
-    outroJogador = &jogo->p1;
-  }
+  outroJogador = numeroJogador == 1 ? &jogo->p2 : &jogo->p1;
 
   // Cada pinguim ocupa duas colunas: PR ou PY.
-  // Se a nova posição tocar numa célula ocupada pelo outro, o movimento é bloqueado.
+  // Se a nova posição tocar no outro, o movimento é bloqueado.
   return jogadorOcupaCelula(outroJogador, linha, coluna) ||
          jogadorOcupaCelula(outroJogador, linha, coluna + 1);
 }
@@ -216,8 +299,31 @@ static int tentarMoverJogador(EstadoJogo *jogo, Jogador *jogador,
   return 1;
 }
 
+static int tentarRodarJogador(EstadoJogo *jogo, Jogador *jogador,
+                              Direcao novaDirecao) {
+  Direcao direcaoAnterior = jogador->direcao;
+
+  jogador->direcao = novaDirecao;
+
+  // A rotação só acontece se o anzol continuar dentro do tabuleiro.
+  if (!anzolDentroDoTabuleiro(jogador, jogo->modo)) {
+    jogador->direcao = direcaoAnterior;
+    return 0;
+  }
+
+  return 1;
+}
+
 static int moverJogador1(EstadoJogo *jogo, int tecla) {
   Jogador *jogador = &jogo->p1;
+
+  if (teclasIguais(tecla, jogador->teclaRodarEsquerda)) {
+    return tentarRodarJogador(jogo, jogador, rodarEsquerda(jogador->direcao));
+  }
+
+  if (teclasIguais(tecla, jogador->teclaRodarDireita)) {
+    return tentarRodarJogador(jogo, jogador, rodarDireita(jogador->direcao));
+  }
 
   if (tecla == 'w' || tecla == 'W') {
     return tentarMoverJogador(jogo, jogador, 1, jogador->linha - 1,
@@ -244,6 +350,14 @@ static int moverJogador1(EstadoJogo *jogo, int tecla) {
 
 static int moverJogador2(EstadoJogo *jogo, int tecla) {
   Jogador *jogador = &jogo->p2;
+
+  if (teclasIguais(tecla, jogador->teclaRodarEsquerda)) {
+    return tentarRodarJogador(jogo, jogador, rodarEsquerda(jogador->direcao));
+  }
+
+  if (teclasIguais(tecla, jogador->teclaRodarDireita)) {
+    return tentarRodarJogador(jogo, jogador, rodarDireita(jogador->direcao));
+  }
 
   if (tecla == KEY_UP) {
     return tentarMoverJogador(jogo, jogador, 2, jogador->linha - 1,
@@ -344,7 +458,7 @@ static int aplicarPontuacao(EstadoJogo *jogo, int numeroJogador) {
 static void iniciarAnimacaoCaptura(EstadoJogo *jogo, int linha, int coluna,
                                    int pontos, int numeroJogador) {
   // Mostra um * e o ganho durante alguns ciclos.
-  jogo->animacaoCaptura = 10;
+  jogo->animacaoCaptura = ANIMACAO_DURACAO;
   jogo->animacaoLinha = linha;
   jogo->animacaoColuna = coluna;
   jogo->animacaoPontos = pontos;
@@ -352,26 +466,24 @@ static void iniciarAnimacaoCaptura(EstadoJogo *jogo, int linha, int coluna,
 }
 
 static int jogadorCapturou(const Jogador *jogador, const Peixe *peixe,
-                           ModoJogo modo, int numeroJogador) {
-  int linhaCaptura;
-  int colunaCaptura;
+                           ModoJogo modo) {
+  int linhaAnzol;
+  int colunaAnzol;
+  int totalCelulas = modo == EMPILHAR ? 1 : 2;
 
   if (!peixe->ativo) {
     return 0;
   }
 
-  obterZonaCaptura(jogador, modo, numeroJogador, &linhaCaptura, &colunaCaptura);
+  for (int i = 0; i < totalCelulas; i++) {
+    obterCelulaAnzol(jogador, modo, i, &linhaAnzol, &colunaAnzol);
 
-  if (peixe->linha != linhaCaptura) {
-    return 0;
+    if (peixe->linha == linhaAnzol && peixe->coluna == colunaAnzol) {
+      return 1;
+    }
   }
 
-  if (modo == EMPILHAR) {
-    return peixe->coluna == colunaCaptura;
-  }
-
-  // O anzol tem dois caracteres: -< para PR e >- para PY.
-  return peixe->coluna == colunaCaptura || peixe->coluna == colunaCaptura + 1;
+  return 0;
 }
 
 static int verificarCapturas(EstadoJogo *jogo) {
@@ -379,7 +491,7 @@ static int verificarCapturas(EstadoJogo *jogo) {
   int colunaPeixe = jogo->peixe.coluna;
   int pontos;
 
-  if (jogadorCapturou(&jogo->p1, &jogo->peixe, jogo->modo, 1)) {
+  if (jogadorCapturou(&jogo->p1, &jogo->peixe, jogo->modo)) {
     pontos = aplicarPontuacao(jogo, 1);
     iniciarAnimacaoCaptura(jogo, linhaPeixe, colunaPeixe, pontos, 1);
     gerarPeixe(jogo);
@@ -387,7 +499,7 @@ static int verificarCapturas(EstadoJogo *jogo) {
   }
 
   if (jogo->jogadores == 2 &&
-      jogadorCapturou(&jogo->p2, &jogo->peixe, jogo->modo, 2)) {
+      jogadorCapturou(&jogo->p2, &jogo->peixe, jogo->modo)) {
     pontos = aplicarPontuacao(jogo, 2);
     iniciarAnimacaoCaptura(jogo, linhaPeixe, colunaPeixe, pontos, 2);
     gerarPeixe(jogo);
@@ -420,7 +532,7 @@ int atualizarJogo(EstadoJogo *jogo, int teclaJogador1, int teclaJogador2,
   (*contadorMovimentoPeixe)++;
 
   // Mantém o peixe numa velocidade parecida mesmo com o ciclo mais rápido.
-  if (*contadorMovimentoPeixe >= 14) {
+  if (*contadorMovimentoPeixe >= MOVIMENTO_PEIXE_INTERVALO) {
     if (moverPeixe(&jogo->peixe)) {
       houveAlteracao = 1;
     }

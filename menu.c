@@ -147,8 +147,10 @@ void mostrarComoJogar(Idioma idioma) {
     printf("- Y : gives bonus to PY.\n\n");
 
     printf("CONTROLS\n");
-    printf("- PR : W A S D | hook -<\n");
-    printf("- PY : arrow keys | hook >-\n");
+    printf("- PR : W A S D | default rotation Z/X\n");
+    printf("- PY : arrow keys | default rotation N/M\n");
+    printf("- Hooks rotate 90 degrees left or right.\n");
+    printf("- Used keys cannot be chosen as rotation keys.\n");
     printf("- *  : caught fish animation\n");
     printf("- P  : pause / continue\n");
     printf("- Q  : quit and show result\n\n");
@@ -209,8 +211,10 @@ void mostrarComoJogar(Idioma idioma) {
     printf("- Y : da bonus ao PY.\n\n");
 
     printf("CONTROLOS\n");
-    printf("- PR : W A S D | anzol -<\n");
-    printf("- PY : setas | anzol >-\n");
+    printf("- PR : W A S D | rotacao padrao Z/X\n");
+    printf("- PY : setas | rotacao padrao N/M\n");
+    printf("- O anzol roda 90 graus para a esquerda ou direita.\n");
+    printf("- Teclas ja usadas nao podem ser escolhidas para rotacao.\n");
     printf("- *  : animacao de captura\n");
     printf("- P  : pausa / continua\n");
     printf("- Q  : sair e mostrar resultado\n\n");
@@ -252,6 +256,166 @@ void mostrarComoJogar(Idioma idioma) {
   }
 
   limparRestoLinha();
+}
+
+
+static int teclaParaMinuscula(int tecla) {
+  if (tecla >= 'A' && tecla <= 'Z') {
+    return tecla - 'A' + 'a';
+  }
+
+  return tecla;
+}
+
+static int teclaReservadaRotacao(int tecla) {
+  tecla = teclaParaMinuscula(tecla);
+
+  // Teclas já usadas no jogo não podem ser escolhidas para rotação.
+  return tecla == 'w' || tecla == 'a' || tecla == 's' || tecla == 'd' ||
+         tecla == 'p' || tecla == 'q';
+}
+
+static int teclaJaEscolhida(int tecla, const int teclasUsadas[], int total) {
+  tecla = teclaParaMinuscula(tecla);
+
+  for (int i = 0; i < total; i++) {
+    if (tecla == teclaParaMinuscula(teclasUsadas[i])) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int lerTeclaRotacao(Idioma idioma, const char *mensagem,
+                           int teclasUsadas[], int *totalUsadas) {
+  char linha[64];
+  int tecla;
+
+  do {
+    printf("%s", mensagem);
+
+    if (fgets(linha, sizeof(linha), stdin) == NULL) {
+      continue;
+    }
+
+    if (strchr(linha, '\n') == NULL) {
+      limparRestoLinha();
+    }
+
+    tecla = (unsigned char)linha[0];
+    tecla = teclaParaMinuscula(tecla);
+
+    if (tecla == '\n' || tecla == '\0' || isspace((unsigned char)tecla)) {
+      if (idioma == IDIOMA_EN) {
+        printf("Choose one visible key.\n");
+      } else {
+        printf("Escolhe uma tecla visivel.\n");
+      }
+      continue;
+    }
+
+    if (teclaReservadaRotacao(tecla)) {
+      if (idioma == IDIOMA_EN) {
+        printf("This key is already used by the game. Choose another one.\n");
+      } else {
+        printf("Esta tecla ja tem funcao no jogo. Escolhe outra.\n");
+      }
+      continue;
+    }
+
+    if (teclaJaEscolhida(tecla, teclasUsadas, *totalUsadas)) {
+      if (idioma == IDIOMA_EN) {
+        printf("This rotation key is already being used. Choose another one.\n");
+      } else {
+        printf("Esta tecla de rotacao ja esta a ser usada. Escolhe outra.\n");
+      }
+      continue;
+    }
+
+    teclasUsadas[*totalUsadas] = tecla;
+    (*totalUsadas)++;
+    return tecla;
+
+  } while (1);
+}
+
+void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma) {
+  int opcao;
+  int teclasUsadas[4];
+  int totalUsadas = 0;
+
+  if (jogo->modo == EMPILHAR) {
+    return;
+  }
+
+  if (idioma == IDIOMA_EN) {
+    printf("\n==============================\n");
+    printf("       HOOK ROTATION\n");
+    printf("==============================\n");
+    printf("Default keys:\n");
+    printf("- PR: Z = left, X = right\n");
+    if (jogo->jogadores == 2) {
+      printf("- PY: N = left, M = right\n");
+    }
+    printf("\nNote: keys already used by the game cannot be chosen.\n");
+    printf("Reserved: W A S D, arrow keys, P and Q.\n\n");
+    printf("1 - Use default keys\n");
+    printf("2 - Choose my own keys\n");
+    printf("Choose an option: ");
+  } else {
+    printf("\n==============================\n");
+    printf("       ROTACAO DO ANZOL\n");
+    printf("==============================\n");
+    printf("Teclas padrao:\n");
+    printf("- PR: Z = esquerda, X = direita\n");
+    if (jogo->jogadores == 2) {
+      printf("- PY: N = esquerda, M = direita\n");
+    }
+    printf("\nNota: teclas que ja fazem alguma coisa no jogo nao podem ser usadas.\n");
+    printf("Reservadas: W A S D, setas, P e Q.\n\n");
+    printf("1 - Usar teclas padrao\n");
+    printf("2 - Escolher as minhas teclas\n");
+    printf("Escolhe uma opcao: ");
+  }
+
+  opcao = lerOpcao();
+
+  if (opcao != 2) {
+    return;
+  }
+
+  if (idioma == IDIOMA_EN) {
+    printf("\nChoose two rotation keys for each active player.\n");
+    printf("Do not use W A S D, arrow keys, P, Q or repeated keys.\n\n");
+
+    jogo->p1.teclaRodarEsquerda = lerTeclaRotacao(
+        idioma, "PR rotate left: ", teclasUsadas, &totalUsadas);
+    jogo->p1.teclaRodarDireita = lerTeclaRotacao(
+        idioma, "PR rotate right: ", teclasUsadas, &totalUsadas);
+
+    if (jogo->jogadores == 2) {
+      jogo->p2.teclaRodarEsquerda = lerTeclaRotacao(
+          idioma, "PY rotate left: ", teclasUsadas, &totalUsadas);
+      jogo->p2.teclaRodarDireita = lerTeclaRotacao(
+          idioma, "PY rotate right: ", teclasUsadas, &totalUsadas);
+    }
+  } else {
+    printf("\nEscolhe duas teclas de rotacao para cada jogador ativo.\n");
+    printf("Nao uses W A S D, setas, P, Q ou teclas repetidas.\n\n");
+
+    jogo->p1.teclaRodarEsquerda = lerTeclaRotacao(
+        idioma, "PR rodar para a esquerda: ", teclasUsadas, &totalUsadas);
+    jogo->p1.teclaRodarDireita = lerTeclaRotacao(
+        idioma, "PR rodar para a direita: ", teclasUsadas, &totalUsadas);
+
+    if (jogo->jogadores == 2) {
+      jogo->p2.teclaRodarEsquerda = lerTeclaRotacao(
+          idioma, "PY rodar para a esquerda: ", teclasUsadas, &totalUsadas);
+      jogo->p2.teclaRodarDireita = lerTeclaRotacao(
+          idioma, "PY rodar para a direita: ", teclasUsadas, &totalUsadas);
+    }
+  }
 }
 
 int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo) {

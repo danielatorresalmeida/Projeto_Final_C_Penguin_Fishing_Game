@@ -387,3 +387,34 @@ Testar a ajuda nos dois idiomas e depois avançar para níveis de dificuldade ou
 **Linhas de código escritas ou alteradas (estimativa):**
 
 70
+
+---
+
+## Sessão 13 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Melhoria da informação apresentada no ecrã principal do jogo.
+- Adição de uma regra rápida no painel de objetivo, adaptada ao modo escolhido.
+- Adição da secção `PEIXE ATUAL` no painel lateral.
+- Apresentação do símbolo do peixe atual com a cor correspondente.
+- Apresentação do peso do peixe atual no modo **Mais peso**.
+- Apresentação do ganho previsto de `PR` e `PY` para o peixe atual.
+- Indicação de `bloqueio ativo` nos modos de dois jogadores.
+- Ajuste da posição do rodapé para evitar sobreposição com o painel lateral.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi acrescentar informação útil sem deixar o ecrã demasiado cheio ou difícil de ler.
+
+**Como resolvi:**
+
+Mantive as regras completas no menu `Como jogar` e coloquei no ecrã principal apenas informação curta e prática: regra rápida do modo, peixe atual e ganho previsto para cada jogador. Assim, o jogador consegue decidir rapidamente se vale a pena apanhar o peixe sem interromper a partida.
+
+**Próximo passo planeado:**
+
+Testar se a nova informação cabe bem em todos os modos e depois avançar para níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+120

@@ -11,10 +11,12 @@
 #define PAINEL_ESQUERDO_LINHA 3
 #define PAINEL_ESQUERDO_COLUNA 0
 #define PAINEL_ESQUERDO_LARGURA 24
+#define PAINEL_ESQUERDO_ALTURA 10
 
 #define PAINEL_DIREITO_LINHA 3
 #define PAINEL_DIREITO_COLUNA 72
 #define PAINEL_DIREITO_LARGURA 30
+#define PAINEL_DIREITO_ALTURA 22
 
 enum {
   COR_JOGADOR_1 = 1,
@@ -246,6 +248,61 @@ static const char *textoPontuacao(ModoJogo modo, int valor) {
   return "pontos";
 }
 
+static int peixeDaCorDoJogador(const Peixe *peixe, int numeroJogador) {
+  // cor 1 pertence ao PR, cor 2 pertence ao PY e cor 0 e neutra.
+  if (numeroJogador == 1) {
+    return peixe->cor == 1;
+  }
+
+  return peixe->cor == 2;
+}
+
+static int ganhoPeixeAtual(const EstadoJogo *jogo, int numeroJogador) {
+  const Peixe *peixe = &jogo->peixe;
+
+  if (!peixe->ativo) {
+    return 0;
+  }
+
+  if (jogo->modo == MAIS_PEIXES) {
+    if (peixeDaCorDoJogador(peixe, numeroJogador)) {
+      return 2;
+    }
+
+    return 1;
+  }
+
+  if (jogo->modo == MAIS_PESO) {
+    if (peixeDaCorDoJogador(peixe, numeroJogador)) {
+      return peixe->peso + 2;
+    }
+
+    return peixe->peso;
+  }
+
+  if (jogo->modo == EMPILHAR) {
+    if (peixeDaCorDoJogador(peixe, numeroJogador)) {
+      return 2;
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int corPeixeVisual(char simbolo) {
+  if (simbolo == 'R') {
+    return COR_PEIXE_VERMELHO;
+  }
+
+  if (simbolo == 'Y') {
+    return COR_PEIXE_AMARELO;
+  }
+
+  return COR_PEIXE_NORMAL;
+}
+
 static const char *objetivoCurto(ModoJogo modo) {
   if (modo == MAIS_PEIXES) {
     return "Maior numero";
@@ -386,27 +443,86 @@ static void desenharCabecalho(const EstadoJogo *jogo) {
 }
 
 static void desenharPainelObjetivo(const EstadoJogo *jogo) {
-  desenharCaixa(PAINEL_ESQUERDO_LINHA, PAINEL_ESQUERDO_COLUNA, 7,
-                PAINEL_ESQUERDO_LARGURA, "OBJETIVO");
+  desenharCaixa(PAINEL_ESQUERDO_LINHA, PAINEL_ESQUERDO_COLUNA,
+                PAINEL_ESQUERDO_ALTURA, PAINEL_ESQUERDO_LARGURA, "OBJETIVO");
 
   mvprintw(PAINEL_ESQUERDO_LINHA + 2, PAINEL_ESQUERDO_COLUNA + 2, "%s",
            objetivoCurto(jogo->modo));
 
   if (jogo->modo == MAIS_PEIXES) {
     mvprintw(PAINEL_ESQUERDO_LINHA + 3, PAINEL_ESQUERDO_COLUNA + 2,
-             "apanhar peixes");
+             "mais peixes");
+    desenharTitulo(PAINEL_ESQUERDO_LINHA + 5, PAINEL_ESQUERDO_COLUNA + 2,
+                   "REGRA");
+    mvprintw(PAINEL_ESQUERDO_LINHA + 6, PAINEL_ESQUERDO_COLUNA + 2,
+             "cor propria +2");
+    mvprintw(PAINEL_ESQUERDO_LINHA + 7, PAINEL_ESQUERDO_COLUNA + 2,
+             "outros +1");
   } else if (jogo->modo == MAIS_PESO) {
     mvprintw(PAINEL_ESQUERDO_LINHA + 3, PAINEL_ESQUERDO_COLUNA + 2,
              "peso total");
+    desenharTitulo(PAINEL_ESQUERDO_LINHA + 5, PAINEL_ESQUERDO_COLUNA + 2,
+                   "REGRA");
+    mvprintw(PAINEL_ESQUERDO_LINHA + 6, PAINEL_ESQUERDO_COLUNA + 2,
+             "peso + bonus");
+    mvprintw(PAINEL_ESQUERDO_LINHA + 7, PAINEL_ESQUERDO_COLUNA + 2,
+             "cor propria +2");
   } else {
     mvprintw(PAINEL_ESQUERDO_LINHA + 3, PAINEL_ESQUERDO_COLUNA + 2,
-             "empilhar peixes");
+             "maior pilha");
+    desenharTitulo(PAINEL_ESQUERDO_LINHA + 5, PAINEL_ESQUERDO_COLUNA + 2,
+                   "REGRA");
+    mvprintw(PAINEL_ESQUERDO_LINHA + 6, PAINEL_ESQUERDO_COLUNA + 2,
+             "cor propria +2");
+    mvprintw(PAINEL_ESQUERDO_LINHA + 7, PAINEL_ESQUERDO_COLUNA + 2,
+             "outros +1");
+  }
+
+  if (jogo->jogadores == 2) {
+    mvprintw(PAINEL_ESQUERDO_LINHA + 8, PAINEL_ESQUERDO_COLUNA + 2,
+             "bloqueio ativo");
+  }
+}
+
+static void desenharPeixeAtual(const EstadoJogo *jogo, int linha, int coluna) {
+  char simbolo[2];
+  int ganhoP1;
+  int ganhoP2;
+
+  desenharTitulo(linha, coluna, "PEIXE ATUAL");
+
+  if (!jogo->peixe.ativo) {
+    mvprintw(linha + 2, coluna, "sem peixe");
+    return;
+  }
+
+  simbolo[0] = jogo->peixe.simbolo;
+  simbolo[1] = '\0';
+
+  desenharTextoComCor(linha + 2, coluna, simbolo,
+                      corPeixeVisual(jogo->peixe.simbolo));
+
+  if (jogo->modo == MAIS_PESO) {
+    mvprintw(linha + 2, coluna + 4, "peso %d", jogo->peixe.peso);
+  } else if (jogo->modo == MAIS_PEIXES) {
+    mvprintw(linha + 2, coluna + 4, "peixe");
+  } else {
+    mvprintw(linha + 2, coluna + 4, "pilha");
+  }
+
+  ganhoP1 = ganhoPeixeAtual(jogo, 1);
+
+  if (jogo->jogadores == 2) {
+    ganhoP2 = ganhoPeixeAtual(jogo, 2);
+    mvprintw(linha + 3, coluna, "PR +%d | PY +%d", ganhoP1, ganhoP2);
+  } else {
+    mvprintw(linha + 3, coluna, "PR ganha +%d", ganhoP1);
   }
 }
 
 static void desenharPainelDireito(const EstadoJogo *jogo) {
-  desenharCaixa(PAINEL_DIREITO_LINHA, PAINEL_DIREITO_COLUNA, 18,
-                PAINEL_DIREITO_LARGURA, "INFO");
+  desenharCaixa(PAINEL_DIREITO_LINHA, PAINEL_DIREITO_COLUNA,
+                PAINEL_DIREITO_ALTURA, PAINEL_DIREITO_LARGURA, "INFO");
 
   desenharTitulo(PAINEL_DIREITO_LINHA + 2, PAINEL_DIREITO_COLUNA + 2,
                  "LEGENDA");
@@ -431,25 +547,28 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
     mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "H/h  anzol");
   }
 
-  desenharTitulo(PAINEL_DIREITO_LINHA + 11, PAINEL_DIREITO_COLUNA + 2,
+  desenharPeixeAtual(jogo, PAINEL_DIREITO_LINHA + 10,
+                     PAINEL_DIREITO_COLUNA + 2);
+
+  desenharTitulo(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
                  "CONTROLOS");
 
-  desenharTextoComCor(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 2,
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 18, PAINEL_DIREITO_COLUNA + 2,
                       "PR", COR_JOGADOR_1);
-  mvprintw(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 6, "WASD");
+  mvprintw(PAINEL_DIREITO_LINHA + 18, PAINEL_DIREITO_COLUNA + 6, "WASD");
 
   if (jogo->jogadores == 2) {
-    desenharTextoComCor(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 2,
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 19, PAINEL_DIREITO_COLUNA + 2,
                         "PY", COR_JOGADOR_2);
-    mvprintw(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 6, "setas");
+    mvprintw(PAINEL_DIREITO_LINHA + 19, PAINEL_DIREITO_COLUNA + 6, "setas");
   }
 
-  mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
+  mvprintw(PAINEL_DIREITO_LINHA + 20, PAINEL_DIREITO_COLUNA + 2,
            "P pausa | Q sair");
 }
 
 static void desenharRodape(void) {
-  mvprintw(TABULEIRO_LINHA + LINHAS + 2, TABULEIRO_COLUNA - 1,
+  mvprintw(TABULEIRO_LINHA + LINHAS + 4, TABULEIRO_COLUNA - 1,
            "P para pausar | Q para sair | ultimos 10 segundos em vermelho");
 }
 

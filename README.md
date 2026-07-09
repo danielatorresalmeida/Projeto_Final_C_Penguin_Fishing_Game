@@ -58,6 +58,30 @@ A pontuação foi ajustada para ficar mais simples e justa: quem apanha o peixe 
 
 Nos modos de dois jogadores, `PR` e `PY` não podem ocupar nem atravessar a mesma posição no tabuleiro. Como cada jogador ocupa dois caracteres, o caminho fica bloqueado quando um jogador tenta passar por cima do outro ou fica encostado a ele. Isto permite bloquear o adversário de forma estratégica sem adicionar penalizações automáticas.
 
+
+## Informação apresentada durante o jogo
+
+Durante a partida, o ecrã mostra informação rápida para ajudar o jogador a tomar decisões sem abrir o menu de ajuda:
+
+- Painel esquerdo com objetivo do modo e regra rápida de pontuação.
+- Painel direito com legenda, controlos e dados do peixe atual.
+- Secção `PEIXE ATUAL`, mostrando o símbolo do peixe, peso quando aplicável e quanto cada jogador ganha se o apanhar.
+- Indicação de `bloqueio ativo` nos modos de dois jogadores.
+
+Exemplos de informação dinâmica:
+
+```text
+PEIXE ATUAL
+R peso 3
+PR +5 | PY +3
+```
+
+```text
+PEIXE ATUAL
+Y pilha
+PR +1 | PY +2
+```
+
 ## Controlos
 
 ### Menu de idioma
@@ -170,6 +194,10 @@ Até ao momento, o projeto já inclui:
 - Destaque visual nos últimos 10 segundos
 - Legenda e controlos agrupados num painel lateral
 - Objetivo do modo apresentado num painel próprio
+- Regra rápida do modo apresentada no painel de objetivo
+- Informação dinâmica do peixe atual durante a partida
+- Ganho previsto de `PR` e `PY` mostrado para o peixe atual
+- Peso do peixe atual mostrado no modo **Mais peso**
 - Cores com ncurses para distinguir jogadores, peixes, água e bordas
 - Jogador `PR` apresentado a vermelho
 - Jogador `PY` apresentado a amarelo

@@ -196,7 +196,8 @@ Até ao momento, o projeto já inclui:
 - Objetivo do modo apresentado num painel próprio
 - Regra rápida do modo apresentada no painel de objetivo
 - Informação dinâmica do peixe atual durante a partida
-- Ganho previsto de `PR` e `PY` mostrado para o peixe atual
+- Peixe atual mostrado por cima do tabuleiro, entre a pontuação e o timer
+- Ganho previsto de `PR` e `PY` mostrado perto do tabuleiro
 - Peso do peixe atual mostrado no modo **Mais peso**
 - Cores com ncurses para distinguir jogadores, peixes, água e bordas
 - Jogador `PR` apresentado a vermelho

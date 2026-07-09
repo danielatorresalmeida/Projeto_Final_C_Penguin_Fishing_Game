@@ -418,3 +418,34 @@ Testar se a nova informação cabe bem em todos os modos e depois avançar para 
 **Linhas de código escritas ou alteradas (estimativa):**
 
 120
+
+---
+
+## Sessão 14 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Melhoria da posição da informação do peixe atual no ecrã principal.
+- Remoção da secção `PEIXE ATUAL` do painel lateral para reduzir ruído visual.
+- Colocação do peixe atual entre a pontuação e o timer.
+- Apresentação do símbolo do peixe atual com cor no centro do ecrã.
+- Apresentação do peso do peixe atual no modo **Mais peso** junto ao tabuleiro.
+- Apresentação do ganho previsto de `PR` e `PY` numa linha mais visível.
+- Redução da altura do painel lateral, deixando-o focado em legenda e controlos.
+- Deslocação ligeira do tabuleiro para criar espaço para a nova linha informativa.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi tornar a informação do peixe atual mais visível sem aproximar demasiado o texto da pontuação ou do timer.
+
+**Como resolvi:**
+
+Movi a informação do peixe atual para o topo do tabuleiro, onde o jogador olha durante a partida. A pontuação ficou na primeira linha, o peixe atual na segunda linha e o timer continua integrado na borda superior do tabuleiro. Também simplifiquei o painel lateral para mostrar apenas legenda e controlos.
+
+**Próximo passo planeado:**
+
+Testar a nova disposição visual nos três modos de jogo e em modo solo e dois jogadores. Depois disso, decidir se a próxima melhoria será níveis de dificuldade ou guardar e retomar jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+85

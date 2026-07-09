@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define TABULEIRO_LINHA 6
+#define TABULEIRO_LINHA 7
 #define TABULEIRO_COLUNA 27
 
 #define PAINEL_ESQUERDO_LINHA 3
@@ -16,7 +16,7 @@
 #define PAINEL_DIREITO_LINHA 3
 #define PAINEL_DIREITO_COLUNA 72
 #define PAINEL_DIREITO_LARGURA 30
-#define PAINEL_DIREITO_ALTURA 22
+#define PAINEL_DIREITO_ALTURA 18
 
 enum {
   COR_JOGADOR_1 = 1,
@@ -397,7 +397,7 @@ static void desenharTempo(const EstadoJogo *jogo) {
 }
 
 static void desenharPontuacaoTopo(const EstadoJogo *jogo) {
-  int linha = TABULEIRO_LINHA - 2;
+  int linha = TABULEIRO_LINHA - 3;
   int esquerdaTabuleiro = TABULEIRO_COLUNA - 1;
   int larguraTabuleiro = COLUNAS + 2;
   int larguraTotal;
@@ -484,40 +484,70 @@ static void desenharPainelObjetivo(const EstadoJogo *jogo) {
   }
 }
 
-static void desenharPeixeAtual(const EstadoJogo *jogo, int linha, int coluna) {
+static void desenharPeixeAtualTopo(const EstadoJogo *jogo) {
+  char detalhe[70];
   char simbolo[2];
+  const char *prefixo = "PEIXE: ";
+  int linha = TABULEIRO_LINHA - 2;
+  int esquerdaTabuleiro = TABULEIRO_COLUNA - 1;
+  int larguraTabuleiro = COLUNAS + 2;
   int ganhoP1;
   int ganhoP2;
+  int larguraTotal;
+  int coluna;
 
-  desenharTitulo(linha, coluna, "PEIXE ATUAL");
-
+  // O peixe atual fica perto do tabuleiro, onde o jogador olha mais.
   if (!jogo->peixe.ativo) {
-    mvprintw(linha + 2, coluna, "sem peixe");
+    const char *texto = "PEIXE: sem peixe";
+    coluna = esquerdaTabuleiro + (larguraTabuleiro - (int)strlen(texto)) / 2;
+    mvprintw(linha, coluna, "%s", texto);
     return;
   }
 
   simbolo[0] = jogo->peixe.simbolo;
   simbolo[1] = '\0';
 
-  desenharTextoComCor(linha + 2, coluna, simbolo,
-                      corPeixeVisual(jogo->peixe.simbolo));
-
-  if (jogo->modo == MAIS_PESO) {
-    mvprintw(linha + 2, coluna + 4, "peso %d", jogo->peixe.peso);
-  } else if (jogo->modo == MAIS_PEIXES) {
-    mvprintw(linha + 2, coluna + 4, "peixe");
-  } else {
-    mvprintw(linha + 2, coluna + 4, "pilha");
-  }
-
   ganhoP1 = ganhoPeixeAtual(jogo, 1);
 
   if (jogo->jogadores == 2) {
     ganhoP2 = ganhoPeixeAtual(jogo, 2);
-    mvprintw(linha + 3, coluna, "PR +%d | PY +%d", ganhoP1, ganhoP2);
+
+    if (jogo->modo == MAIS_PESO) {
+      snprintf(detalhe, sizeof(detalhe), " peso %d | PR +%d | PY +%d",
+               jogo->peixe.peso, ganhoP1, ganhoP2);
+    } else if (jogo->modo == MAIS_PEIXES) {
+      snprintf(detalhe, sizeof(detalhe), " | PR +%d | PY +%d", ganhoP1,
+               ganhoP2);
+    } else {
+      snprintf(detalhe, sizeof(detalhe), " pilha | PR +%d | PY +%d", ganhoP1,
+               ganhoP2);
+    }
   } else {
-    mvprintw(linha + 3, coluna, "PR ganha +%d", ganhoP1);
+    if (jogo->modo == MAIS_PESO) {
+      snprintf(detalhe, sizeof(detalhe), " peso %d | PR +%d", jogo->peixe.peso,
+               ganhoP1);
+    } else if (jogo->modo == MAIS_PEIXES) {
+      snprintf(detalhe, sizeof(detalhe), " | PR +%d", ganhoP1);
+    } else {
+      snprintf(detalhe, sizeof(detalhe), " pilha | PR +%d", ganhoP1);
+    }
   }
+
+  larguraTotal = (int)strlen(prefixo) + 1 + (int)strlen(detalhe);
+  coluna = esquerdaTabuleiro + (larguraTabuleiro - larguraTotal) / 2;
+
+  if (coluna < esquerdaTabuleiro) {
+    coluna = esquerdaTabuleiro;
+  }
+
+  mvprintw(linha, coluna, "%s", prefixo);
+  coluna += (int)strlen(prefixo);
+
+  desenharTextoComCor(linha, coluna, simbolo,
+                      corPeixeVisual(jogo->peixe.simbolo));
+  coluna += 1;
+
+  mvprintw(linha, coluna, "%s", detalhe);
 }
 
 static void desenharPainelDireito(const EstadoJogo *jogo) {
@@ -547,23 +577,20 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
     mvprintw(PAINEL_DIREITO_LINHA + 8, PAINEL_DIREITO_COLUNA + 2, "H/h  anzol");
   }
 
-  desenharPeixeAtual(jogo, PAINEL_DIREITO_LINHA + 10,
-                     PAINEL_DIREITO_COLUNA + 2);
-
-  desenharTitulo(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
+  desenharTitulo(PAINEL_DIREITO_LINHA + 11, PAINEL_DIREITO_COLUNA + 2,
                  "CONTROLOS");
 
-  desenharTextoComCor(PAINEL_DIREITO_LINHA + 18, PAINEL_DIREITO_COLUNA + 2,
+  desenharTextoComCor(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 2,
                       "PR", COR_JOGADOR_1);
-  mvprintw(PAINEL_DIREITO_LINHA + 18, PAINEL_DIREITO_COLUNA + 6, "WASD");
+  mvprintw(PAINEL_DIREITO_LINHA + 13, PAINEL_DIREITO_COLUNA + 6, "WASD");
 
   if (jogo->jogadores == 2) {
-    desenharTextoComCor(PAINEL_DIREITO_LINHA + 19, PAINEL_DIREITO_COLUNA + 2,
+    desenharTextoComCor(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 2,
                         "PY", COR_JOGADOR_2);
-    mvprintw(PAINEL_DIREITO_LINHA + 19, PAINEL_DIREITO_COLUNA + 6, "setas");
+    mvprintw(PAINEL_DIREITO_LINHA + 14, PAINEL_DIREITO_COLUNA + 6, "setas");
   }
 
-  mvprintw(PAINEL_DIREITO_LINHA + 20, PAINEL_DIREITO_COLUNA + 2,
+  mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
            "P pausa | Q sair");
 }
 
@@ -636,6 +663,7 @@ void desenharJogo(const EstadoJogo *jogo) {
   desenharPainelDireito(jogo);
 
   desenharPontuacaoTopo(jogo);
+  desenharPeixeAtualTopo(jogo);
   desenharBordaTabuleiro();
   desenharTempo(jogo);
 

@@ -150,6 +150,7 @@ projeto-final-c/
 ├── logic.h
 ├── render.c
 ├── render.h
+├── Makefile
 ├── README.md
 ├── LOG.md
 ├── .gitignore
@@ -168,6 +169,7 @@ projeto-final-c/
 - `logic.h`: contém os protótipos relacionados com a lógica do jogo.
 - `render.c`: contém a parte visual do jogo, incluindo tabuleiro, cores, bordas, timer, painéis e legendas.
 - `render.h`: contém os protótipos relacionados com a apresentação visual.
+- `Makefile`: automatiza compilação, execução, limpeza e formatação do projeto.
 
 ## Estado Atual do Projeto
 
@@ -242,7 +244,13 @@ Até ao momento, o projeto já inclui:
 
 ## Como Compilar
 
-No ambiente **MSYS2 UCRT64**, dentro da pasta do projeto, usar o seguinte comando:
+No ambiente **MSYS2 UCRT64**, dentro da pasta do projeto, a forma recomendada é usar o `Makefile`:
+
+```bash
+make
+```
+
+Também é possível compilar manualmente com:
 
 ```bash
 gcc main.c game.c menu.c logic.c render.c -o jogo -I/ucrt64/include -L/ucrt64/lib -lncursesw
@@ -251,6 +259,12 @@ gcc main.c game.c menu.c logic.c render.c -o jogo -I/ucrt64/include -L/ucrt64/li
 ## Como Executar
 
 Depois de compilar, executar com:
+
+```bash
+make run
+```
+
+Ou, se compilaste manualmente:
 
 ```bash
 ./jogo
@@ -262,7 +276,18 @@ No Windows, o executável gerado pode aparecer como:
 jogo.exe
 ```
 
-Este ficheiro não deve ser enviado para o GitHub.
+Os ficheiros `jogo.exe` e `*.o` são ficheiros gerados pela compilação e não devem ser enviados para o GitHub.
+
+## Comandos úteis do Makefile
+
+```bash
+make          # compila o jogo
+make run      # compila e executa
+make clean    # remove executável e ficheiros .o
+make rebuild  # limpa e compila de novo
+make format   # formata o código com clang-format
+make kill     # fecha jogo.exe caso esteja aberto
+```
 
 ## Formatar o Código
 
@@ -354,7 +379,3 @@ play -q -n synth 0.1 sine 880 vol 0.3
 
 Este projeto encontra-se em desenvolvimento. A versão atual representa uma fase funcional do jogo, com foco na estrutura base, menus, movimento, pontuação, modos de jogo, organização do código e melhoria da experiência no terminal.
 
-
-### Nota sobre o som
-
-O jogo usa som de confirmação no menu principal, nos submenus e som de captura durante a partida. Para sons mais avançados, é usado o comando `play`, que faz parte do SoX. Se o `play` não estiver instalado ou disponível no terminal, o jogo continua a funcionar com um fallback simples. No Windows/MSYS2, o fallback usa `Beep()` para que o som do menu também possa funcionar antes da interface ncurses ser iniciada. As funções de menu recebem o estado do som e só tocam quando a opção de som está ligada.

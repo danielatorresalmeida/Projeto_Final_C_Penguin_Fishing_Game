@@ -661,3 +661,31 @@ Testar todos os menus com o som ligado e desligado, para confirmar que o feedbac
 **Linhas de código escritas ou alteradas (estimativa):**
 
 70
+
+---
+
+## Sessão 22 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Adição do `Makefile` ao projeto.
+- Criação de comandos para compilar, executar, limpar, reconstruir e formatar o projeto.
+- Atualização do `.gitignore` para ignorar ficheiros gerados pela compilação, como `*.o`.
+- Pequena limpeza no código, removendo uma linha repetida em `logic.c`.
+- Atualização do `README.md` com instruções de uso do `Makefile`.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi garantir que o projeto continuava simples de compilar no MSYS2 UCRT64, mas sem depender de comandos longos escritos manualmente todas as vezes.
+
+**Como resolvi:**
+
+Criei um `Makefile` com comandos curtos e claros. Assim, `make` compila o jogo, `make run` executa, `make clean` remove ficheiros gerados e `make rebuild` recompila tudo do zero.
+
+**Próximo passo planeado:**
+
+Fazer uma revisão final antes da entrega, testando todos os modos de jogo e garantindo que apenas ficheiros de código e documentação são enviados para o GitHub.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+35

@@ -3,3 +3,6 @@ jogo.exe
 jogo2
 jogo2.exe
 *.exe
+*.o
+*.obj
+*.out

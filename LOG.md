@@ -128,7 +128,6 @@ Dividi o projeto em ficheiros com responsabilidades diferentes: `menu.c`, `logic
 
 Melhorar o resultado final, mostrando o vencedor de forma mais clara nos modos de dois jogadores.
 
-
 **Linhas de código escritas ou alteradas (estimativa):**
 
 300
@@ -164,7 +163,6 @@ Separei melhor as responsabilidades entre os ficheiros e mantive a função `nom
 
 Melhorar a organização visual do ecrã do jogo durante a partida.
 
-
 **Linhas de código escritas ou alteradas (estimativa):**
 
 260
@@ -199,7 +197,6 @@ Mantive a lógica da pontuação em `logic.c` e concentrei a apresentação visu
 
 Testar todos os modos de jogo e considerar a criação de níveis de dificuldade ou uma opção de pausa antes de implementar guardar e retomar jogo.
 
-
 **Linhas de código escritas ou alteradas (estimativa):**
 
 240
@@ -230,7 +227,6 @@ Passei a ler as teclas acumuladas em cada ciclo e usei apenas a tecla mais recen
 **Próximo passo planeado:**
 
 Testar todos os modos de jogo e, depois, decidir entre adicionar uma opção de pausa, níveis de dificuldade ou guardar e retomar jogo.
-
 
 **Linhas de código escritas ou alteradas (estimativa):**
 
@@ -481,7 +477,6 @@ Testar a nova zona de captura com os anzóis direcionais nos modos solo e dois j
 
 140
 
-
 ---
 
 ## Sessão 16 – 09/07/2026
@@ -584,52 +579,57 @@ Testar o som em diferentes terminais do Windows e decidir se vale a pena adicion
 - Alteração do som de captura para um efeito mais parecido com moeda.
 - Criação da função `tocarSomMenu()` para separar o som do menu do som de captura.
 - Atualização de `tocarSomCaptura()` para tentar usar o comando `play` do SoX.
-- Manutenção de fallback com beep simples e `flash()` quando o terminal não suporta som avançado.
+- Manutenção de fallback com beep simples, `flash()` ou `Beep()` no Windows quando o terminal não suporta som avançado.
+- Correção do som de confirmação para funcionar fora da interface ncurses.
+- Ajuste dos comandos de som para funcionarem melhor no Windows/MSYS2.
+- Adição de som nos submenus, como idioma, saída, jogar novamente e rotação dos anzóis.
+- Atualização das funções do menu para receberem o estado do som ligado/desligado.
 - Atualização da documentação com nota sobre o SoX e o comando `play`.
 
 **Maior dificuldade:**
 
-A maior dificuldade foi adicionar sons diferentes sem tornar o código dependente de ficheiros de áudio externos ou de uma instalação obrigatória do SoX.
+A maior dificuldade foi fazer o som funcionar de forma consistente no menu principal, nos submenus e durante a partida, sem depender obrigatoriamente de ficheiros externos ou de uma instalação específica do SoX.
 
 **Como resolvi:**
 
-Criei funções pequenas e separadas para cada tipo de som. O jogo verifica se o comando `play` existe e usa o som avançado quando possível. Se não existir, continua a funcionar com um beep simples, sem quebrar a jogabilidade.
+Criei funções separadas para o som do menu e para o som de captura. O jogo tenta usar o comando `play` quando está disponível, mas continua a funcionar com alternativas simples quando esse comando não existe. Também passei o estado do som para os submenus, para que o feedback sonoro respeite a opção de som ligada ou desligada.
 
 **Próximo passo planeado:**
 
-Testar os sons no MSYS2 UCRT64 e, se necessário, ajustar o volume ou a duração do som de captura.
+Testar o som com a opção ligada e desligada, confirmar o comportamento em diferentes terminais e avançar para a preparação final do projeto.
 
 **Linhas de código escritas ou alteradas (estimativa):**
 
-85
+200
+
 ---
 
 ## Sessão 20 – 09/07/2026
 
 **Funcionalidades implementadas:**
 
-- Correção do som de confirmação no menu principal.
-- Remoção da verificação com `command -v`, que podia falhar no Windows/MSYS2.
-- Alteração dos comandos de som para usarem redirecionamento compatível com Windows e Linux.
-- Adição de fallback com `Beep()` no Windows quando o SoX/play não está disponível.
-- Manutenção do som de captura com efeito tipo moeda quando o SoX/play está instalado.
+- Adição do `Makefile` ao projeto.
+- Criação de comandos para compilar, executar, limpar, reconstruir e formatar o projeto.
+- Adição do comando `make kill` para fechar o `jogo.exe` caso esteja aberto.
+- Atualização do `.gitignore` para ignorar ficheiros gerados pela compilação, como `*.o`, `*.obj`, `*.out` e `jogo.exe`.
+- Pequena limpeza no código, removendo uma linha repetida em `logic.c`.
+- Atualização do `README.md` com instruções de uso do `Makefile`.
 
 **Maior dificuldade:**
 
-A maior dificuldade foi garantir que o som do menu funcionava antes da interface ncurses ser iniciada. O `beep()` do ncurses nem sempre funciona antes de `initscr()`, por isso era necessário um fallback externo ao ncurses.
+A maior dificuldade foi preparar o projeto para ficar mais simples de compilar e mais limpo para enviar para o GitHub.
 
 **Como resolvi:**
 
-Passei a tentar tocar o som com o comando `play` diretamente. Se esse comando falhar, o jogo usa `Beep()` no Windows ou o bell do terminal noutros sistemas. Assim, o menu continua a dar feedback sonoro mesmo quando o SoX não está instalado.
+Criei um `Makefile` com comandos curtos e claros. Assim, `make` compila o jogo, `make run` executa, `make clean` remove ficheiros gerados e `make rebuild` recompila tudo do zero. Também atualizei o `.gitignore` para evitar que ficheiros gerados pela compilação sejam enviados para o repositório.
 
 **Próximo passo planeado:**
 
-Testar o som no MSYS2 UCRT64 e confirmar se o comando `play` está disponível no terminal usado para correr o jogo.
+Acrescentar uma função recursiva ao projeto de forma útil e coerente com o código existente.
 
 **Linhas de código escritas ou alteradas (estimativa):**
 
-45
-
+40
 
 ---
 
@@ -637,55 +637,26 @@ Testar o som no MSYS2 UCRT64 e confirmar se o comando `play` está disponível n
 
 **Funcionalidades implementadas:**
 
-- Correção do som de confirmação nos submenus.
-- Adição de som ao escolher o idioma.
-- Adição de som ao confirmar saída.
-- Adição de som ao escolher jogar novamente ou sair após uma partida.
-- Adição de som ao escolher usar teclas padrão ou teclas personalizadas na rotação do anzol.
-- Adição de som ao aceitar teclas personalizadas de rotação válidas.
-- Atualização das assinaturas de funções do menu para receberem o estado do som.
-- Manutenção do som desligado quando a opção de som está desativada.
+- Adição de uma função recursiva ao projeto.
+- Substituição da contagem iterativa de dígitos por uma versão recursiva em `render.c`.
+- Utilização da função recursiva para apoiar o alinhamento da pontuação no topo do tabuleiro.
+- Manutenção do comportamento visual do jogo sem alterar a jogabilidade.
+- Comentários simples adicionados para explicar o caso base e a chamada recursiva.
+- Atualização do `README.md` e do `LOG.md` com a nova melhoria.
 
 **Maior dificuldade:**
 
-A maior dificuldade foi garantir que o som tocava em todos os pontos de decisão do programa, e não apenas no menu principal ou antes de iniciar a partida.
+A maior dificuldade foi acrescentar recursividade de forma útil, sem forçar uma solução artificial nem tornar o código mais complicado.
 
 **Como resolvi:**
 
-Criei uma função auxiliar simples em `menu.c` para tocar o som apenas quando o som está ligado. Depois passei o estado do som para os submenus que aceitam opções do utilizador, como idioma, confirmação de saída, jogar novamente e configuração das teclas de rotação.
+Escolhi a função de contagem de dígitos para aplicar recursividade, porque ela já era usada pelo jogo para calcular o espaço necessário para mostrar a pontuação. A função `contarDigitosPositivo()` tem um caso base para números entre 0 e 9 e chama-se novamente dividindo o número por 10 até terminar.
 
 **Próximo passo planeado:**
 
-Testar todos os menus com o som ligado e desligado, para confirmar que o feedback sonoro está consistente em todo o jogo.
+Testar todos os modos do jogo e preparar a versão final para apresentação e entrega.
 
 **Linhas de código escritas ou alteradas (estimativa):**
 
-70
+25
 
----
-
-## Sessão 22 – 09/07/2026
-
-**Funcionalidades implementadas:**
-
-- Adição do `Makefile` ao projeto.
-- Criação de comandos para compilar, executar, limpar, reconstruir e formatar o projeto.
-- Atualização do `.gitignore` para ignorar ficheiros gerados pela compilação, como `*.o`.
-- Pequena limpeza no código, removendo uma linha repetida em `logic.c`.
-- Atualização do `README.md` com instruções de uso do `Makefile`.
-
-**Maior dificuldade:**
-
-A maior dificuldade foi garantir que o projeto continuava simples de compilar no MSYS2 UCRT64, mas sem depender de comandos longos escritos manualmente todas as vezes.
-
-**Como resolvi:**
-
-Criei um `Makefile` com comandos curtos e claros. Assim, `make` compila o jogo, `make run` executa, `make clean` remove ficheiros gerados e `make rebuild` recompila tudo do zero.
-
-**Próximo passo planeado:**
-
-Fazer uma revisão final antes da entrega, testando todos os modos de jogo e garantindo que apenas ficheiros de código e documentação são enviados para o GitHub.
-
-**Linhas de código escritas ou alteradas (estimativa):**
-
-35

@@ -391,20 +391,23 @@ static const char *objetivoCurto(ModoJogo modo) {
   return "Pontuar";
 }
 
+static int contarDigitosPositivo(int valor) {
+  // Caso base: um numero de 0 a 9 tem um digito.
+  if (valor < 10) {
+    return 1;
+  }
+
+  // Chamada recursiva: remove o ultimo digito.
+  return 1 + contarDigitosPositivo(valor / 10);
+}
+
 static int contarDigitos(int valor) {
-  int digitos = 1;
-
+  // Mantem suporte para valores negativos, se forem usados no futuro.
   if (valor < 0) {
-    valor = -valor;
-    digitos++;
+    return 1 + contarDigitosPositivo(-valor);
   }
 
-  while (valor >= 10) {
-    valor /= 10;
-    digitos++;
-  }
-
-  return digitos;
+  return contarDigitosPositivo(valor);
 }
 
 static int larguraPontuacaoJogador(const Jogador *jogador, ModoJogo modo) {

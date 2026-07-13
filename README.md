@@ -167,7 +167,7 @@ projeto-final-c/
 - `menu.h`: contém os protótipos relacionados com o menu.
 - `logic.c`: contém a lógica do jogo, como movimento, geração do peixe, capturas, pontuação e resultado final.
 - `logic.h`: contém os protótipos relacionados com a lógica do jogo.
-- `render.c`: contém a parte visual do jogo, incluindo tabuleiro, cores, bordas, timer, painéis e legendas.
+- `render.c`: contém a parte visual do jogo, incluindo tabuleiro, cores, bordas, timer, painéis, legendas e uma função recursiva auxiliar para contar dígitos.
 - `render.h`: contém os protótipos relacionados com a apresentação visual.
 - `Makefile`: automatiza compilação, execução, limpeza e formatação do projeto.
 
@@ -241,6 +241,7 @@ Até ao momento, o projeto já inclui:
 - Melhor fluidez do jogo com `erase()`, `refresh()` e controlo do ciclo principal
 - Validação das opções do menu com `strtol()`
 - Tratamento de entradas inválidas, como letras, símbolos, comandos incompletos e ENTER vazio
+- Função recursiva em `render.c` para contar os dígitos usados no alinhamento da pontuação
 
 ## Como Compilar
 

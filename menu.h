@@ -4,12 +4,12 @@
 #include "game.h"
 
 int lerOpcao(void);
-Idioma escolherIdioma(void);
-void mostrarMenu(Idioma idioma);
+Idioma escolherIdioma(int somAtivo);
+void mostrarMenu(Idioma idioma, int somAtivo);
 void mostrarComoJogar(Idioma idioma);
-void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma);
+void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma, int somAtivo);
 
-int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo);
-int confirmarSaida(Idioma idioma);
+int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo, int somAtivo);
+int confirmarSaida(Idioma idioma, int somAtivo);
 
 #endif

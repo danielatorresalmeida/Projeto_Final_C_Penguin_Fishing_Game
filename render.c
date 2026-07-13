@@ -4,7 +4,13 @@
 #include <ncursesw/ncurses.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 #define TABULEIRO_LINHA 7
 #define TABULEIRO_COLUNA 27
@@ -70,6 +76,59 @@ void inicializarInterface(void) {
 }
 
 void finalizarInterface(void) { endwin(); }
+
+#ifdef _WIN32
+#define SOM_REDIRECIONAMENTO " > NUL 2>&1"
+#else
+#define SOM_REDIRECIONAMENTO " > /dev/null 2>&1"
+#endif
+
+#define SOM_MENU_COMANDO \
+  "play -q -n synth 0.06 sine 880 vol 0.22" SOM_REDIRECIONAMENTO
+
+#define SOM_CAPTURA_COMANDO_1 \
+  "play -q -n synth 0.07 sine 880 vol 0.35" SOM_REDIRECIONAMENTO
+
+#define SOM_CAPTURA_COMANDO_2 \
+  "play -q -n synth 0.09 sine 1320 vol 0.35" SOM_REDIRECIONAMENTO
+
+static int executarComandoSom(const char *comando) {
+  // Tenta tocar som com SoX/play. Se falhar, usamos fallback.
+  return system(comando) == 0;
+}
+
+static void tocarFallbackSistema(int frequencia, int duracaoMs) {
+  // Fallback para quando o SoX/play nao esta instalado.
+#ifdef _WIN32
+  Beep((DWORD)frequencia, (DWORD)duracaoMs);
+#else
+  (void)frequencia;
+  (void)duracaoMs;
+  fputc('\a', stdout);
+  fflush(stdout);
+#endif
+}
+
+void tocarSomMenu(void) {
+  // Som curto para confirmar uma opcao valida do menu.
+  if (executarComandoSom(SOM_MENU_COMANDO)) {
+    return;
+  }
+
+  tocarFallbackSistema(880, 60);
+}
+
+void tocarSomCaptura(void) {
+  // Som tipo moeda quando um peixe e apanhado.
+  if (executarComandoSom(SOM_CAPTURA_COMANDO_1)) {
+    (void)executarComandoSom(SOM_CAPTURA_COMANDO_2);
+    return;
+  }
+
+  tocarFallbackSistema(880, 60);
+  tocarFallbackSistema(1320, 80);
+  flash();
+}
 
 static void desenharTextoComCor(int linha, int coluna, const char *texto,
                                 int cor) {
@@ -623,6 +682,9 @@ static void desenharPainelDireito(const EstadoJogo *jogo) {
 
   mvprintw(PAINEL_DIREITO_LINHA + 16, PAINEL_DIREITO_COLUNA + 2,
            "P pausa | Q sair");
+
+  mvprintw(PAINEL_DIREITO_LINHA + 17, PAINEL_DIREITO_COLUNA + 2,
+           jogo->somAtivo ? "Som: ligado" : "Som: desligado");
 
   if (jogo->modo != EMPILHAR) {
     desenharTitulo(PAINEL_DIREITO_LINHA + 18, PAINEL_DIREITO_COLUNA + 2,

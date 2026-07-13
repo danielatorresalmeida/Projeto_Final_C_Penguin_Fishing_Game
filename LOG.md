@@ -543,3 +543,121 @@ Testar a rotação dos anzóis em todos os modos de pesca, confirmar se a captur
 
 260
 
+---
+
+## Sessão 18 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Adição de som quando um peixe é capturado.
+- Criação do campo `tocarSomCaptura` para sinalizar capturas entre a lógica e a interface.
+- Criação do campo `somAtivo` para permitir ligar ou desligar o som.
+- Implementação de `tocarSomCaptura()` com `beep()` do ncurses.
+- Adição de fallback visual com `flash()` quando o terminal não reproduz o beep.
+- Adição da opção `12` no menu principal para ligar ou desligar o som.
+- Atualização do painel lateral para mostrar se o som está ligado ou desligado.
+- Atualização do `Como jogar / How to play` com a indicação do som de captura.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi adicionar som sem misturar a lógica do jogo com a parte visual.
+
+**Como resolvi:**
+
+A lógica apenas marca que houve uma captura, usando `tocarSomCaptura`. Depois, o ciclo principal verifica essa marca e chama a função de som em `render.c`, mantendo a separação entre lógica, interface e controlo do jogo.
+
+**Próximo passo planeado:**
+
+Testar o som em diferentes terminais do Windows e decidir se vale a pena adicionar mais feedback sonoro para pausa, fim do jogo ou erro de tecla.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+95
+
+---
+
+## Sessão 19 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Adição de som curto de confirmação ao escolher uma opção válida no menu.
+- Alteração do som de captura para um efeito mais parecido com moeda.
+- Criação da função `tocarSomMenu()` para separar o som do menu do som de captura.
+- Atualização de `tocarSomCaptura()` para tentar usar o comando `play` do SoX.
+- Manutenção de fallback com beep simples e `flash()` quando o terminal não suporta som avançado.
+- Atualização da documentação com nota sobre o SoX e o comando `play`.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi adicionar sons diferentes sem tornar o código dependente de ficheiros de áudio externos ou de uma instalação obrigatória do SoX.
+
+**Como resolvi:**
+
+Criei funções pequenas e separadas para cada tipo de som. O jogo verifica se o comando `play` existe e usa o som avançado quando possível. Se não existir, continua a funcionar com um beep simples, sem quebrar a jogabilidade.
+
+**Próximo passo planeado:**
+
+Testar os sons no MSYS2 UCRT64 e, se necessário, ajustar o volume ou a duração do som de captura.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+85
+---
+
+## Sessão 20 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Correção do som de confirmação no menu principal.
+- Remoção da verificação com `command -v`, que podia falhar no Windows/MSYS2.
+- Alteração dos comandos de som para usarem redirecionamento compatível com Windows e Linux.
+- Adição de fallback com `Beep()` no Windows quando o SoX/play não está disponível.
+- Manutenção do som de captura com efeito tipo moeda quando o SoX/play está instalado.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi garantir que o som do menu funcionava antes da interface ncurses ser iniciada. O `beep()` do ncurses nem sempre funciona antes de `initscr()`, por isso era necessário um fallback externo ao ncurses.
+
+**Como resolvi:**
+
+Passei a tentar tocar o som com o comando `play` diretamente. Se esse comando falhar, o jogo usa `Beep()` no Windows ou o bell do terminal noutros sistemas. Assim, o menu continua a dar feedback sonoro mesmo quando o SoX não está instalado.
+
+**Próximo passo planeado:**
+
+Testar o som no MSYS2 UCRT64 e confirmar se o comando `play` está disponível no terminal usado para correr o jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+45
+
+
+---
+
+## Sessão 21 – 09/07/2026
+
+**Funcionalidades implementadas:**
+
+- Correção do som de confirmação nos submenus.
+- Adição de som ao escolher o idioma.
+- Adição de som ao confirmar saída.
+- Adição de som ao escolher jogar novamente ou sair após uma partida.
+- Adição de som ao escolher usar teclas padrão ou teclas personalizadas na rotação do anzol.
+- Adição de som ao aceitar teclas personalizadas de rotação válidas.
+- Atualização das assinaturas de funções do menu para receberem o estado do som.
+- Manutenção do som desligado quando a opção de som está desativada.
+
+**Maior dificuldade:**
+
+A maior dificuldade foi garantir que o som tocava em todos os pontos de decisão do programa, e não apenas no menu principal ou antes de iniciar a partida.
+
+**Como resolvi:**
+
+Criei uma função auxiliar simples em `menu.c` para tocar o som apenas quando o som está ligado. Depois passei o estado do som para os submenus que aceitam opções do utilizador, como idioma, confirmação de saída, jogar novamente e configuração das teclas de rotação.
+
+**Próximo passo planeado:**
+
+Testar todos os menus com o som ligado e desligado, para confirmar que o feedback sonoro está consistente em todo o jogo.
+
+**Linhas de código escritas ou alteradas (estimativa):**
+
+70

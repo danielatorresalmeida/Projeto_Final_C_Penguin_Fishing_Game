@@ -96,6 +96,7 @@ PEIXE: Y pilha | PR +1 | PY +2
 - `1` a `9`: escolher o modo de jogo
 - `10`: mudar idioma
 - `11`: Como jogar / How to play
+- `12`: ligar ou desligar o som
 - `0`: sair do jogo
 
 ### Durante o jogo
@@ -123,6 +124,7 @@ PEIXE: Y pilha | PR +1 | PY +2
 - Antes da partida, o jogador pode escolher teclas personalizadas para rodar o anzol
 - Teclas já usadas pelo jogo não podem ser escolhidas para rotação, como `W`, `A`, `S`, `D`, setas, `P` e `Q`
 - `*`: aparece brevemente quando um peixe é capturado
+- Som de captura: toca quando um peixe é apanhado, se o som estiver ligado
 - `P`: pausar ou continuar o jogo
 - `Q`: interromper o jogo e mostrar o resultado final
 
@@ -323,6 +325,36 @@ Projeto desenvolvido por:
 
 **Daniela Torres Almeida**
 
+
+## Som / Sound
+
+O jogo inclui dois tipos de feedback sonoro:
+
+- som curto de confirmação quando é escolhida uma opção válida no menu principal;
+- som curto de confirmação nos submenus, como idioma, saída, jogar novamente e rotação;
+- som de captura, em estilo moeda, quando um peixe é apanhado.
+
+No menu principal existe a opção `12` para ligar ou desligar o som.
+
+Para os sons mais avançados, o jogo tenta usar o comando `play`, que faz parte do SoX. Se o `play` não estiver instalado ou não estiver disponível no terminal, o jogo continua a funcionar e usa um beep simples como alternativa.
+
+No MSYS2 UCRT64, o SoX pode ser instalado com:
+
+```bash
+pacman -S mingw-w64-ucrt-x86_64-sox
+```
+
+Para testar o comando `play`:
+
+```bash
+play -q -n synth 0.1 sine 880 vol 0.3
+```
+
 ## Nota Final
 
 Este projeto encontra-se em desenvolvimento. A versão atual representa uma fase funcional do jogo, com foco na estrutura base, menus, movimento, pontuação, modos de jogo, organização do código e melhoria da experiência no terminal.
+
+
+### Nota sobre o som
+
+O jogo usa som de confirmação no menu principal, nos submenus e som de captura durante a partida. Para sons mais avançados, é usado o comando `play`, que faz parte do SoX. Se o `play` não estiver instalado ou disponível no terminal, o jogo continua a funcionar com um fallback simples. No Windows/MSYS2, o fallback usa `Beep()` para que o som do menu também possa funcionar antes da interface ncurses ser iniciada. As funções de menu recebem o estado do som e só tocam quando a opção de som está ligada.

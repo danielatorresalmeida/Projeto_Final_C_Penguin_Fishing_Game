@@ -150,9 +150,22 @@ void cicloJogo(EstadoJogo *jogo) {
       ultimoSegundo = time(NULL);
       contadorMovimentoPeixe = 0;
       desenharJogo(jogo);
-    } else if (atualizarJogo(jogo, entrada.jogador1, entrada.jogador2,
-                             &contadorMovimentoPeixe, &ultimoSegundo)) {
-      desenharJogo(jogo);
+    } else {
+      int houveAlteracao = atualizarJogo(jogo, entrada.jogador1, entrada.jogador2,
+                                         &contadorMovimentoPeixe, &ultimoSegundo);
+
+      if (jogo->tocarSomCaptura) {
+        // O som e tratado fora da logica para manter responsabilidades separadas.
+        if (jogo->somAtivo) {
+          tocarSomCaptura();
+        }
+
+        jogo->tocarSomCaptura = 0;
+      }
+
+      if (houveAlteracao) {
+        desenharJogo(jogo);
+      }
     }
 
     napms(ATRASO_CICLO_MS);

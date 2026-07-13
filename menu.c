@@ -1,4 +1,5 @@
 #include "menu.h"
+#include "render.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -20,6 +21,13 @@ static void limparRestoLinha(void) {
 static void limparEcraTexto(void) {
   // Limpa o terminal para a ajuda ficar mais legivel.
   printf("\033[2J\033[H");
+}
+
+static void tocarConfirmacaoMenu(int somAtivo) {
+  // Toca apenas quando o som esta ligado.
+  if (somAtivo) {
+    tocarSomMenu();
+  }
 }
 
 int lerOpcao(void) {
@@ -55,7 +63,7 @@ int lerOpcao(void) {
   return (int)valor;
 }
 
-Idioma escolherIdioma(void) {
+Idioma escolherIdioma(int somAtivo) {
   int opcao;
 
   do {
@@ -70,14 +78,17 @@ Idioma escolherIdioma(void) {
     opcao = lerOpcao();
 
     if (opcao == IDIOMA_EN) {
+      tocarConfirmacaoMenu(somAtivo);
       return IDIOMA_EN;
     }
 
     if (opcao == IDIOMA_PT) {
+      tocarConfirmacaoMenu(somAtivo);
       return IDIOMA_PT;
     }
 
     if (opcao == IDIOMA_SAIR) {
+      tocarConfirmacaoMenu(somAtivo);
       return IDIOMA_SAIR;
     }
 
@@ -86,7 +97,7 @@ Idioma escolherIdioma(void) {
   } while (1);
 }
 
-void mostrarMenu(Idioma idioma) {
+void mostrarMenu(Idioma idioma, int somAtivo) {
   printf("\n==============================\n");
   printf("     PENGUIN FISHING GAME\n");
   printf("==============================\n");
@@ -103,6 +114,7 @@ void mostrarMenu(Idioma idioma) {
     printf("9 - Practice: stack fish\n");
     printf("10 - Change language\n");
     printf("11 - How to play\n");
+    printf("12 - Sound: %s\n", somAtivo ? "on" : "off");
     printf("0 - Exit\n");
     printf("Choose an option: ");
   } else {
@@ -117,6 +129,7 @@ void mostrarMenu(Idioma idioma) {
     printf("9 - Pratica: empilhar peixes\n");
     printf("10 - Mudar idioma\n");
     printf("11 - Como jogar\n");
+    printf("12 - Som: %s\n", somAtivo ? "ligado" : "desligado");
     printf("0 - Sair\n");
     printf("Escolhe uma opcao: ");
   }
@@ -151,7 +164,9 @@ void mostrarComoJogar(Idioma idioma) {
     printf("- PY : arrow keys | default rotation N/M\n");
     printf("- Hooks rotate 90 degrees left or right.\n");
     printf("- Used keys cannot be chosen as rotation keys.\n");
-    printf("- *  : caught fish animation\n");
+    printf("- *  : caught fish animation with sound.\n");
+    printf("- Menu choices and captures can use sound.\n");
+    printf("- Sound can be turned on/off in the main menu.\n");
     printf("- P  : pause / continue\n");
     printf("- Q  : quit and show result\n\n");
 
@@ -215,7 +230,9 @@ void mostrarComoJogar(Idioma idioma) {
     printf("- PY : setas | rotacao padrao N/M\n");
     printf("- O anzol roda 90 graus para a esquerda ou direita.\n");
     printf("- Teclas ja usadas nao podem ser escolhidas para rotacao.\n");
-    printf("- *  : animacao de captura\n");
+    printf("- *  : animacao de captura com som.\n");
+    printf("- O menu e as capturas podem usar som.\n");
+    printf("- O som pode ser ligado/desligado no menu principal.\n");
     printf("- P  : pausa / continua\n");
     printf("- Q  : sair e mostrar resultado\n\n");
 
@@ -288,7 +305,8 @@ static int teclaJaEscolhida(int tecla, const int teclasUsadas[], int total) {
 }
 
 static int lerTeclaRotacao(Idioma idioma, const char *mensagem,
-                           int teclasUsadas[], int *totalUsadas) {
+                           int teclasUsadas[], int *totalUsadas,
+                           int somAtivo) {
   char linha[64];
   int tecla;
 
@@ -335,12 +353,13 @@ static int lerTeclaRotacao(Idioma idioma, const char *mensagem,
 
     teclasUsadas[*totalUsadas] = tecla;
     (*totalUsadas)++;
+    tocarConfirmacaoMenu(somAtivo);
     return tecla;
 
   } while (1);
 }
 
-void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma) {
+void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma, int somAtivo) {
   int opcao;
   int teclasUsadas[4];
   int totalUsadas = 0;
@@ -379,9 +398,22 @@ void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma) {
     printf("Escolhe uma opcao: ");
   }
 
-  opcao = lerOpcao();
+  do {
+    opcao = lerOpcao();
 
-  if (opcao != 2) {
+    if (opcao == 1 || opcao == 2) {
+      tocarConfirmacaoMenu(somAtivo);
+      break;
+    }
+
+    if (idioma == IDIOMA_EN) {
+      printf("Invalid option. Choose 1 or 2: ");
+    } else {
+      printf("Opcao invalida. Escolhe 1 ou 2: ");
+    }
+  } while (1);
+
+  if (opcao == 1) {
     return;
   }
 
@@ -390,35 +422,39 @@ void configurarTeclasRotacao(EstadoJogo *jogo, Idioma idioma) {
     printf("Do not use W A S D, arrow keys, P, Q or repeated keys.\n\n");
 
     jogo->p1.teclaRodarEsquerda = lerTeclaRotacao(
-        idioma, "PR rotate left: ", teclasUsadas, &totalUsadas);
+        idioma, "PR rotate left: ", teclasUsadas, &totalUsadas, somAtivo);
     jogo->p1.teclaRodarDireita = lerTeclaRotacao(
-        idioma, "PR rotate right: ", teclasUsadas, &totalUsadas);
+        idioma, "PR rotate right: ", teclasUsadas, &totalUsadas, somAtivo);
 
     if (jogo->jogadores == 2) {
       jogo->p2.teclaRodarEsquerda = lerTeclaRotacao(
-          idioma, "PY rotate left: ", teclasUsadas, &totalUsadas);
+          idioma, "PY rotate left: ", teclasUsadas, &totalUsadas, somAtivo);
       jogo->p2.teclaRodarDireita = lerTeclaRotacao(
-          idioma, "PY rotate right: ", teclasUsadas, &totalUsadas);
+          idioma, "PY rotate right: ", teclasUsadas, &totalUsadas, somAtivo);
     }
   } else {
     printf("\nEscolhe duas teclas de rotacao para cada jogador ativo.\n");
     printf("Nao uses W A S D, setas, P, Q ou teclas repetidas.\n\n");
 
     jogo->p1.teclaRodarEsquerda = lerTeclaRotacao(
-        idioma, "PR rodar para a esquerda: ", teclasUsadas, &totalUsadas);
+        idioma, "PR rodar para a esquerda: ", teclasUsadas, &totalUsadas,
+        somAtivo);
     jogo->p1.teclaRodarDireita = lerTeclaRotacao(
-        idioma, "PR rodar para a direita: ", teclasUsadas, &totalUsadas);
+        idioma, "PR rodar para a direita: ", teclasUsadas, &totalUsadas,
+        somAtivo);
 
     if (jogo->jogadores == 2) {
       jogo->p2.teclaRodarEsquerda = lerTeclaRotacao(
-          idioma, "PY rodar para a esquerda: ", teclasUsadas, &totalUsadas);
+          idioma, "PY rodar para a esquerda: ", teclasUsadas, &totalUsadas,
+          somAtivo);
       jogo->p2.teclaRodarDireita = lerTeclaRotacao(
-          idioma, "PY rodar para a direita: ", teclasUsadas, &totalUsadas);
+          idioma, "PY rodar para a direita: ", teclasUsadas, &totalUsadas,
+          somAtivo);
     }
   }
 }
 
-int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo) {
+int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo, int somAtivo) {
   int opcao;
 
   do {
@@ -451,10 +487,12 @@ int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo) {
     opcao = lerOpcao();
 
     if (opcao == 1) {
+      tocarConfirmacaoMenu(somAtivo);
       return 1;
     }
 
     if (opcao == 0) {
+      tocarConfirmacaoMenu(somAtivo);
       return 0;
     }
 
@@ -467,7 +505,7 @@ int perguntarJogarNovamente(Idioma idioma, const EstadoJogo *jogo) {
   } while (1);
 }
 
-int confirmarSaida(Idioma idioma) {
+int confirmarSaida(Idioma idioma, int somAtivo) {
   int opcao;
 
   do {
@@ -486,10 +524,12 @@ int confirmarSaida(Idioma idioma) {
     opcao = lerOpcao();
 
     if (opcao == 1) {
+      tocarConfirmacaoMenu(somAtivo);
       return 1;
     }
 
     if (opcao == 2) {
+      tocarConfirmacaoMenu(somAtivo);
       return 0;
     }
 

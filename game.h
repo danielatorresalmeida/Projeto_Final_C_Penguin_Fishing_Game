@@ -3,7 +3,7 @@
 
 #define OPCAO_INVALIDA -1
 #define OPCAO_MINIMA 0
-#define OPCAO_MAXIMA 11
+#define OPCAO_MAXIMA 12
 
 #define LINHAS 15
 #define COLUNAS 40
@@ -60,6 +60,8 @@ typedef struct {
   int animacaoColuna;
   int animacaoPontos;
   int animacaoJogador;
+  int tocarSomCaptura;
+  int somAtivo;
 } EstadoJogo;
 
 void iniciarJogo(EstadoJogo *jogo, int opcao);

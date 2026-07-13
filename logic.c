@@ -242,6 +242,8 @@ void iniciarJogo(EstadoJogo *jogo, int opcao) {
   jogo->animacaoColuna = 0;
   jogo->animacaoPontos = 0;
   jogo->animacaoJogador = 0;
+  jogo->tocarSomCaptura = 0;
+  jogo->somAtivo = 1;
 
   gerarPeixe(jogo);
 }
@@ -463,6 +465,7 @@ static void iniciarAnimacaoCaptura(EstadoJogo *jogo, int linha, int coluna,
   jogo->animacaoColuna = coluna;
   jogo->animacaoPontos = pontos;
   jogo->animacaoJogador = numeroJogador;
+  jogo->tocarSomCaptura = 1;
 }
 
 static int jogadorCapturou(const Jogador *jogador, const Peixe *peixe,

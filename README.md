@@ -1,20 +1,55 @@
-# Penguin Fishing Game
+# 🐧 Penguin Fishing Game
 
-## Descrição do Projeto
+Terminal fishing game built in **C** with **ncurses**, developed as a final academic project.
 
-O **Penguin Fishing Game** é um jogo desenvolvido em linguagem C como projeto final da unidade curricular. A ideia inicial surgiu a partir de um protótipo feito em Scratch, onde pinguins apanham peixes que saltam da água.
+The game supports solo, practice and two-player modes, with real-time keyboard controls, scoring rules, pause functionality, bilingual menus and multiple fishing mechanics.
 
-Nesta versão em C, o jogo foi adaptado para funcionar no terminal, usando a biblioteca **ncurses** para permitir movimento, desenho do tabuleiro, cores, menus e interação com o teclado.
+## ✨ Highlights
 
-Link do protótipo original em Scratch:
+- 🎮 9 game modes: solo, practice and two-player
+- 🐟 Multiple scoring systems: fish count, weight and stacking
+- 👥 Local two-player gameplay
+- 🎣 Directional hooks with configurable rotation controls
+- 🌍 Portuguese and English interface
+- ⏱️ Timer, pause and end-game results
+- 🎨 Terminal UI with colours using `ncurses`
+- 🧩 Modular C structure with separate game, logic, menu and rendering layers
+- 🛠️ Makefile for build, run, clean, debug and formatting tasks
 
-https://scratch.mit.edu/projects/1311165580/editor/
+## 🛠️ Tech Stack
 
-## Objetivo do Jogo
+`C` · `ncurses` · `GCC` · `Make` · `MSYS2 UCRT64`
 
-O objetivo do jogo é controlar um pinguim e apanhar peixes que aparecem no tabuleiro. Dependendo do modo escolhido, o jogador pode tentar apanhar mais peixes, acumular mais peso ou empilhar peixes.
+## 📸 Application Preview
 
-O jogo já contém uma versão funcional com escolha inicial de idioma, menu principal, opção de ajuda, tabuleiro com cores, movimento, pontuação por modo, timer visível, tecla de pausa, melhor resposta das teclas nos dois jogadores, animação simples de captura, rotação de anzóis, teclas de rotação personalizáveis, resultado final e opção para jogar novamente.
+### Main Menu
+
+![Penguin Fishing Game main menu](docs/screenshots/main-menu.png)
+
+### Gameplay
+
+![Penguin Fishing Game gameplay](docs/screenshots/gameplay.png)
+
+## 🎯 Project Background
+
+This project evolved from an earlier Scratch prototype into a more structured terminal application written in C.
+
+The main goal was to practise modular programming, game logic, input handling, state management and terminal-based user interfaces.
+
+[View the original Scratch prototype](https://scratch.mit.edu/projects/1311165580/editor/)
+
+## 🎮 Game Objective
+
+Control a penguin and catch fish that appear on the board.
+
+Depending on the selected game mode, the goal is to:
+
+- catch the highest number of fish;
+- accumulate the greatest total weight;
+- build the largest fish stack.
+
+The current version includes menus, help screens, scoring, timers, pause support, configurable controls, capture animations, final results and replay functionality.
+
 
 ## Modos de Jogo
 
